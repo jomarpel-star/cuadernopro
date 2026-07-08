@@ -18,7 +18,7 @@ if str(APP_ROOT) not in sys.path:
 
 os.environ.setdefault("CUADERNOPRO_DB_PATH", str(DB_PRUEBA))
 
-from core.schema_v7 import asegurar_ampliaciones_v8_0_1  # noqa: E402
+from core.schema_v7 import asegurar_ampliaciones_v8_0_1, crear_base_v7  # noqa: E402
 
 
 def _conectar():
@@ -1285,16 +1285,29 @@ def _comprobar_contabilidad(conn, ctx, movimiento_id, tipo):
     )
 
 
+def _asegurar_base_prueba():
+
+    if DB_PRUEBA.exists():
+
+        return
+
+    crear_base_v7(DB_PRUEBA, sobrescribir=True)
+
+
 def main():
 
     print("Prueba listados v7")
     print("==================")
     print(f"Base usada: {DB_PRUEBA}")
 
-    if not DB_PRUEBA.exists():
+    try:
+
+        _asegurar_base_prueba()
+
+    except Exception as exc:
 
         print("Resultado: FALLO")
-        print("La base de prueba manual no existe")
+        print(f"No se pudo preparar la base de prueba: {exc}")
         return 1
 
     with _conectar() as conn:

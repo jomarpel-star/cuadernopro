@@ -41,10 +41,10 @@ Las capturas recomendadas para la publicación inicial están recogidas en
 
 ## Descarga
 
-La primera versión instalable para Windows es CuadernoPro v8.3.3. La release
+La primera versión instalable para Windows es CuadernoPro v8.4.3. La release
 pública debe ofrecer:
 
-- `CuadernoPro-8.3.3-Setup.exe`
+- `CuadernoPro-8.4.3-Setup.exe`
 - `SHA256SUMS.txt`
 
 El instalador Windows deja los datos del usuario en:
@@ -58,7 +58,7 @@ públicos. No cambia la funcionalidad ni genera binarios.
 
 ## Instalación rápida
 
-1. Descargar `CuadernoPro-8.3.3-Setup.exe` desde la release publicada.
+1. Descargar `CuadernoPro-8.4.3-Setup.exe` desde la release publicada.
 2. Ejecutar el instalador.
 3. Abrir CuadernoPro desde el acceso directo creado.
 4. Completar los datos iniciales de la explotación.

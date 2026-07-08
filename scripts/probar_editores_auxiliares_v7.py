@@ -16,7 +16,7 @@ if str(APP_ROOT) not in sys.path:
 
 os.environ["CUADERNOPRO_DB_PATH"] = str(DB_EDITORES)
 
-from core.schema_v7 import asegurar_ampliaciones_v8_0_1  # noqa: E402
+from core.schema_v7 import asegurar_ampliaciones_v8_0_1, crear_base_v7  # noqa: E402
 
 
 def _conectar():
@@ -617,15 +617,28 @@ def _codigo_campana(seccion, modulo, clave_estado):
     )
 
 
+def _asegurar_base_prueba():
+
+    if DB_EDITORES.exists():
+
+        return
+
+    crear_base_v7(DB_EDITORES, sobrescribir=True)
+
+
 def main():
 
     print("Prueba editores y auxiliares v7")
     print("===============================")
     print(f"Base usada: {DB_EDITORES}")
 
-    if not DB_EDITORES.exists():
+    try:
 
-        print("FALLO: la base de prueba no existe")
+        _asegurar_base_prueba()
+
+    except Exception as exc:
+
+        print(f"FALLO: no se pudo preparar la base de prueba: {exc}")
         return 1
 
     with _conectar() as conn:

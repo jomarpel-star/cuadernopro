@@ -1,4 +1,4 @@
-# CuadernoPro v8.3.3
+# CuadernoPro v8.4.3
 
 Primera versión instalable para Windows de CuadernoPro.
 
@@ -23,7 +23,7 @@ sin Docker, WSL, Python ni terminal.
 
 ## Descargas
 
-- `CuadernoPro-8.3.3-Setup.exe`
+- `CuadernoPro-8.4.3-Setup.exe`
 - `SHA256SUMS.txt`
 
 ## Avisos importantes

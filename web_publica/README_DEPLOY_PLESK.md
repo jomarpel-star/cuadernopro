@@ -26,8 +26,8 @@ Excels ni binarios Windows.
 ## Comprobación de enlaces
 
 - Release estable: `https://github.com/jomarpel-star/cuadernopro/releases/latest`.
-- Instalador Windows recomendado: `https://github.com/jomarpel-star/cuadernopro/releases/download/v8.3.3/CuadernoPro-8.3.3-Setup.exe`.
-- SHA256: `https://github.com/jomarpel-star/cuadernopro/releases/download/v8.3.3/SHA256SUMS.txt`.
+- Instalador Windows recomendado: `https://github.com/jomarpel-star/cuadernopro/releases/download/v8.4.3/CuadernoPro-8.4.3-Setup.exe`.
+- SHA256: `https://github.com/jomarpel-star/cuadernopro/releases/download/v8.4.3/SHA256SUMS.txt`.
 - Repositorio: `https://github.com/jomarpel-star/cuadernopro`.
 - Soporte: `https://github.com/jomarpel-star/cuadernopro/issues`.
 - Revisa que no se suben instaladores, bases, backups, runtime, documentos

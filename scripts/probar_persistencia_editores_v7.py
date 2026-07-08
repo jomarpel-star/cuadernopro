@@ -20,7 +20,7 @@ if str(APP_ROOT) not in sys.path:
 os.environ["CUADERNOPRO_DB_PATH"] = str(DB_PERSISTENCIA)
 
 from core.db import leer  # noqa: E402
-from core.schema_v7 import asegurar_ampliaciones_v8_0_1  # noqa: E402
+from core.schema_v7 import asegurar_ampliaciones_v8_0_1, crear_base_v7  # noqa: E402
 import modules.cosecha as cosecha_mod  # noqa: E402
 import modules.contabilidad as contabilidad_mod  # noqa: E402
 import modules.explotacion as explotacion_mod  # noqa: E402
@@ -371,6 +371,15 @@ def _preparar_base():
         ctx = _insertar_base_minima(conn)
         conn.commit()
         return ctx
+
+
+def _asegurar_base_prueba():
+
+    if DB_PERSISTENCIA.exists():
+
+        return
+
+    crear_base_v7(DB_PERSISTENCIA, sobrescribir=True)
 
 
 def _registrar(resultados, modulo, funcion):
@@ -1249,18 +1258,11 @@ def _imprimir_resultados(resultados, ctx):
 
 def main():
 
-    if not DB_PERSISTENCIA.exists():
-
-        print("Prueba persistencia editores v7")
-        print("===============================")
-        print(f"Base usada: {DB_PERSISTENCIA}")
-        print("FALLO: la base de prueba no existe")
-        return 1
-
     resultados = []
 
     try:
 
+        _asegurar_base_prueba()
         ctx = _preparar_base()
 
     except Exception:

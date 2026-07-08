@@ -194,3 +194,9 @@ Documentación principal:
   actualizar.
 - El ZIP de código no debe incluir bases, backups, runtime, exports, documentos
   subidos ni temporales.
+
+### v8.4.3
+
+- Alinea la versión pública, la web y el instalador Windows.
+- El instalador recomendado pasa a ser `CuadernoPro-8.4.3-Setup.exe`.
+- No cambia el modelo de datos.

@@ -531,3 +531,9 @@ con instalación limpia, Docker, persistencia SQLite y salidas principales.
 - Script de validación `scripts/probar_release_v8.py`.
 - Prueba `scripts/probar_importacion_catalogos_siex_v8.py`.
 - ZIP limpio previsto con `git archive` desde el commit/tag de release.
+
+### v8.4.3
+
+- Alinea la versión pública, la web y el instalador Windows.
+- El instalador recomendado pasa a ser `CuadernoPro-8.4.3-Setup.exe`.
+- No cambia el modelo de datos.
