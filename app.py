@@ -339,7 +339,7 @@ def _requiere_campana():
         return False
 
     st.warning(
-        "Primero crea una campaña inicial para usar esta sección."
+        "Activa una campaña para usar esta sección."
     )
     asistente_inicio.render()
     return True

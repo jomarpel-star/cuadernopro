@@ -221,20 +221,7 @@ def obtener_campana_actual_si_existe():
 
         return int(activa.iloc[0]["id"])
 
-    ultima = _leer_seguro(
-        """
-        SELECT id
-        FROM campanas
-        ORDER BY fecha_inicio DESC,id DESC
-        LIMIT 1
-        """
-    )
-
-    if ultima is None or ultima.empty:
-
-        return None
-
-    return int(ultima.iloc[0]["id"])
+    return None
 
 
 def _campana_por_defecto():

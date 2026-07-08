@@ -1,5 +1,5 @@
 APP_NAME = "CuadernoPro"
-APP_VERSION = "8.4.4"
+APP_VERSION = "8.4.5"
 APP_STAGE = "estable"
 
 
