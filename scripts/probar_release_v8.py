@@ -9,7 +9,7 @@ import time
 
 APP_ROOT = Path(__file__).resolve().parents[1]
 DB_RELEASE_V8 = APP_ROOT / "runtime" / "v8" / "prueba_release_v8.db"
-VERSION_ESPERADA = "8.4.5"
+VERSION_ESPERADA = "8.4.6"
 
 
 PRUEBAS = [
@@ -47,6 +47,10 @@ PRUEBAS = [
     (
         "Campanas activacion v8.4.5",
         ["scripts/probar_campanas_activacion_v8.py"],
+    ),
+    (
+        "Mapas cultivos campana activa v8.4.6",
+        ["scripts/probar_mapas_cultivos_campana_activa_v8.py"],
     ),
     ("Persistencia editores", ["scripts/probar_persistencia_editores_v7.py"]),
     ("Pre-v8 completo", ["scripts/probar_pre_v8_v7_14.py"]),

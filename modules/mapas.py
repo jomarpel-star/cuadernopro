@@ -1,8 +1,10 @@
 from datetime import datetime
+from html import escape
 
 import pandas as pd
 import streamlit as st
 
+from core.campanas import obtener_campana_activa
 from core.db import conectar, leer
 from core.ui_tablas import preparar_dataframe_visual
 from services.sigpac import (
@@ -117,6 +119,308 @@ def _estado_geometria_visual(estado, geojson=None):
     return "Con geometría" if texto_geojson.strip() else "Sin geometría"
 
 
+def _texto_mapa(valor):
+
+    try:
+
+        if valor is None or pd.isna(valor):
+
+            return ""
+
+    except (TypeError, ValueError):
+
+        if valor is None:
+
+            return ""
+
+    texto = str(valor).strip()
+
+    if texto.casefold() in {"none", "nan", "null"}:
+
+        return ""
+
+    return texto
+
+
+def _numero_mapa(valor):
+
+    numero = pd.to_numeric(valor, errors="coerce")
+
+    if pd.isna(numero):
+
+        return None
+
+    return float(numero)
+
+
+def _formatear_superficie_mapa(valor):
+
+    numero = _numero_mapa(valor)
+
+    if numero is None:
+
+        return ""
+
+    return f"{numero:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def _normalizar_entero_arboles_tooltip(valor):
+
+    try:
+
+        if valor is None or pd.isna(valor):
+
+            return None
+
+    except (TypeError, ValueError):
+
+        if valor is None:
+
+            return None
+
+    if isinstance(valor, bool):
+
+        return None
+
+    if isinstance(valor, int):
+
+        numero = valor
+
+    elif isinstance(valor, float):
+
+        if not valor.is_integer():
+
+            return None
+
+        numero = int(valor)
+
+    else:
+
+        texto = str(valor).strip().replace(" ", "")
+
+        if not texto or texto.casefold() in {"none", "nan", "null"}:
+
+            return None
+
+        if texto.startswith("+"):
+
+            texto = texto[1:]
+
+        if texto.startswith("-"):
+
+            return None
+
+        if "," in texto:
+
+            if texto.count(",") != 1:
+
+                return None
+
+            parte_entera, parte_decimal = texto.split(",", 1)
+
+            if not parte_decimal.isdigit() or int(parte_decimal) != 0:
+
+                return None
+
+            if "." in parte_entera:
+
+                grupos = parte_entera.split(".")
+
+                if (
+                    not grupos
+                    or not grupos[0].isdigit()
+                    or not all(
+                        grupo.isdigit() and len(grupo) == 3
+                        for grupo in grupos[1:]
+                    )
+                ):
+
+                    return None
+
+                parte_entera = "".join(grupos)
+
+            if not parte_entera.isdigit():
+
+                return None
+
+            numero = int(parte_entera)
+
+        elif "." in texto:
+
+            grupos = texto.split(".")
+
+            es_miles_es = (
+                grupos[0].isdigit()
+                and all(
+                    grupo.isdigit() and len(grupo) == 3
+                    for grupo in grupos[1:]
+                )
+            )
+
+            if es_miles_es:
+
+                numero = int("".join(grupos))
+
+            elif (
+                len(grupos) == 2
+                and grupos[0].isdigit()
+                and grupos[1].isdigit()
+                and int(grupos[1]) == 0
+            ):
+
+                numero = int(grupos[0])
+
+            else:
+
+                return None
+
+        elif texto.isdigit():
+
+            numero = int(texto)
+
+        else:
+
+            return None
+
+    if numero <= 0:
+
+        return None
+
+    return numero
+
+
+def _formatear_arboles_tooltip(valor):
+
+    numero = _normalizar_entero_arboles_tooltip(valor)
+
+    if numero is None:
+
+        return ""
+
+    return f"{numero:,}".replace(",", ".") + " árboles"
+
+
+def _formatear_arboles_mapa(valor):
+
+    arboles = _formatear_arboles_tooltip(valor)
+
+    if not arboles:
+
+        return ""
+
+    return arboles.replace(" árboles", "")
+
+
+def _clave_texto_mapa(valor):
+
+    return _texto_mapa(valor).casefold()
+
+
+def _obtener_campana_contexto_mapa(conn, campana_id=None):
+
+    if campana_id is not None:
+
+        numero = pd.to_numeric(campana_id, errors="coerce")
+
+        if not pd.isna(numero):
+
+            return int(numero)
+
+    activa = obtener_campana_activa(conn)
+
+    if not activa:
+
+        return None
+
+    return int(activa["id"])
+
+
+def _resumir_cultivo_mapa(cultivo):
+
+    especie = _texto_mapa(cultivo.get("especie")).upper()
+    variedad = _texto_mapa(cultivo.get("variedad")).upper()
+    arboles = _formatear_arboles_tooltip(cultivo.get("arboles"))
+    partes = []
+
+    for valor in [especie, variedad]:
+
+        if not valor:
+
+            continue
+
+        claves = {_clave_texto_mapa(parte) for parte in partes}
+
+        if _clave_texto_mapa(valor) not in claves:
+
+            partes.append(valor)
+
+    if arboles:
+
+        partes.append(arboles)
+
+    return " · ".join(partes)
+
+
+def resumir_cultivos_mapa(cultivos, max_cultivos=2):
+
+    vistos = set()
+    resumenes = []
+
+    for cultivo in cultivos:
+
+        resumen = _resumir_cultivo_mapa(cultivo)
+
+        if not resumen:
+
+            continue
+
+        clave = _clave_texto_mapa(resumen)
+
+        if clave in vistos:
+
+            continue
+
+        vistos.add(clave)
+        resumenes.append(resumen)
+
+    if not resumenes:
+
+        return ""
+
+    if len(resumenes) <= max_cultivos:
+
+        return "<br>".join(escape(resumen) for resumen in resumenes)
+
+    primero = escape(resumenes[0])
+    restantes = len(resumenes) - 1
+    return f"{primero}<br>y {restantes} más"
+
+
+def construir_tooltip_parcela_mapa(parcela, cultivos):
+
+    nombre = _texto_mapa(parcela.get("nombre")) or "Sin nombre"
+    poligono = _texto_mapa(parcela.get("poligono")) or "—"
+    numero_parcela = _texto_mapa(parcela.get("parcela")) or "—"
+    recinto = _texto_mapa(parcela.get("recinto")) or "—"
+    superficie = _formatear_superficie_mapa(parcela.get("superficie_sigpac"))
+    cultivo = resumir_cultivos_mapa(cultivos) or "Sin cultivo en campaña activa"
+    superficie_linea = (
+        f"<br><b>Sup.:</b> {escape(superficie)} ha"
+        if superficie
+        else ""
+    )
+    return (
+        '<div style="max-width:360px;font-size:12px;line-height:1.25;'
+        'padding:6px 8px;">'
+        f"<b>Parcela:</b> {escape(nombre)}<br>"
+        f"<b>SIGPAC:</b> Pol. {escape(poligono)} · "
+        f"Parc. {escape(numero_parcela)} · Rec. {escape(recinto)}"
+        f"{superficie_linea}<br>"
+        f"<b>Cultivo:</b> {cultivo}"
+        "</div>"
+    )
+
+
 def _actualizar_parcela_sigpac(conn, parcela_id, valores):
 
     columnas = _columnas_tabla_conn(conn, "parcelas")
@@ -227,17 +531,33 @@ def _leer_parcelas_mapa():
         return pd.read_sql_query(sql, conn)
 
 
-def _leer_cultivos_mapa():
+def _dataframe_cultivos_mapa_vacio():
+
+    return pd.DataFrame(
+        columns=["parcela_id", "especie", "variedad", "sistema", "arboles"]
+    )
+
+
+def _leer_cultivos_mapa(campana_id=None):
 
     with conectar() as conn:
 
         if not _tabla_existe_conn(conn, "cultivos"):
 
-            return pd.DataFrame(
-                columns=["parcela_id", "especie", "variedad", "sistema", "arboles"]
-            )
+            return _dataframe_cultivos_mapa_vacio()
 
         columnas_cultivos = _columnas_tabla_conn(conn, "cultivos")
+
+        if "campana_id" not in columnas_cultivos:
+
+            return _dataframe_cultivos_mapa_vacio()
+
+        campana_contexto_id = _obtener_campana_contexto_mapa(conn, campana_id)
+
+        if campana_contexto_id is None:
+
+            return _dataframe_cultivos_mapa_vacio()
+
         expr_especie = (
             "c.especie AS especie"
             if "especie" in columnas_cultivos
@@ -273,9 +593,10 @@ def _leer_cultivos_mapa():
                    {expr_sistema},{expr_arboles}
             FROM cultivo_parcelas cp
             JOIN cultivos c ON c.id=cp.cultivo_id
+            WHERE c.campana_id=?
             ORDER BY cp.parcela_id,c.id
             """
-            return pd.read_sql_query(sql, conn)
+            return pd.read_sql_query(sql, conn, params=(campana_contexto_id,))
 
         if "parcela_id" in columnas_cultivos:
 
@@ -283,13 +604,12 @@ def _leer_cultivos_mapa():
             SELECT c.parcela_id,{expr_especie},{expr_variedad},
                    {expr_sistema},{expr_arboles}
             FROM cultivos c
+            WHERE c.campana_id=?
             ORDER BY c.parcela_id,c.id
             """
-            return pd.read_sql_query(sql, conn)
+            return pd.read_sql_query(sql, conn, params=(campana_contexto_id,))
 
-    return pd.DataFrame(
-        columns=["parcela_id", "especie", "variedad", "sistema", "arboles"]
-    )
+    return _dataframe_cultivos_mapa_vacio()
 
 
 def render():
@@ -660,44 +980,32 @@ def render():
             )
 
         parcelas_mapa = _leer_parcelas_mapa()
-        cultivos_mapa = _leer_cultivos_mapa()
+
+        with conectar() as conn_contexto:
+
+            campana_contexto_id = _obtener_campana_contexto_mapa(conn_contexto)
+
+        if campana_contexto_id is None:
+
+            st.warning(
+                "No hay campaña activa. El mapa mostrará parcelas sin "
+                "mezclar cultivos de campañas históricas."
+            )
+
+        cultivos_mapa = _leer_cultivos_mapa(campana_contexto_id)
         cultivos_por_parcela = {}
 
         for _, cultivo in cultivos_mapa.iterrows():
 
             parcela_id = int(cultivo["parcela_id"])
-            especie = "" if pd.isna(cultivo["especie"]) else str(
-                cultivo["especie"]
-            ).strip()
-            variedad = "" if pd.isna(cultivo["variedad"]) else str(
-                cultivo["variedad"]
-            ).strip()
-            sistema = "" if pd.isna(cultivo["sistema"]) else str(
-                cultivo["sistema"]
-            ).strip()
-            arboles = ""
-
-            if not pd.isna(cultivo["arboles"]):
-
-                arboles = str(int(cultivo["arboles"]))
-
-            partes = [
-                valor
-                for valor in [especie, variedad, sistema]
-                if valor
-            ]
-            texto_cultivo = " / ".join(partes)
-
-            if arboles:
-
-                texto_cultivo += (
-                    (" / " if texto_cultivo else "")
-                    + f"{arboles} árboles"
-                )
+            especie = _texto_mapa(cultivo["especie"]).upper()
+            variedad = _texto_mapa(cultivo["variedad"]).upper()
+            sistema = _texto_mapa(cultivo["sistema"]).upper()
+            arboles = _formatear_arboles_mapa(cultivo["arboles"])
 
             cultivos_por_parcela.setdefault(parcela_id, []).append(
                 {
-                    "texto": texto_cultivo or "Sin detalle",
+                    "texto": _resumir_cultivo_mapa(cultivo) or "Sin detalle",
                     "especie": especie,
                     "variedad": variedad,
                     "sistema": sistema,
@@ -742,9 +1050,13 @@ def render():
 
             parcela_id = int(parcela["id"])
             cultivos = cultivos_por_parcela.get(parcela_id, [])
-            cultivos_texto = "; ".join(
-                cultivo["texto"] for cultivo in cultivos
-            ) or "Sin cultivo asociado"
+            cultivos_texto = ", ".join(
+                dict.fromkeys(
+                    cultivo["texto"]
+                    for cultivo in cultivos
+                    if cultivo["texto"]
+                )
+            ) or "Sin cultivo en campaña activa"
             especies = "; ".join(
                 dict.fromkeys(
                     cultivo["especie"]
@@ -775,6 +1087,10 @@ def render():
                 f"Pol. {parcela['poligono']} "
                 f"Parc. {parcela['parcela']} Rec. {parcela['recinto']}"
             )
+            referencia_compacta = (
+                f"Pol. {parcela['poligono']} · "
+                f"Parc. {parcela['parcela']} · Rec. {parcela['recinto']}"
+            )
             superficie_sigpac = (
                 None
                 if pd.isna(parcela["superficie_sigpac"])
@@ -787,6 +1103,13 @@ def render():
                 else str(parcela["nombre"]).strip()
             )
             estilo_cultivo = obtener_color_cultivo(cultivos_texto)
+            tooltip_html = construir_tooltip_parcela_mapa(
+                {
+                    **parcela.to_dict(),
+                    "nombre": nombre_parcela,
+                },
+                cultivos,
+            )
 
             for feature in geojson["features"]:
 
@@ -801,8 +1124,15 @@ def render():
                     "parcela": parcela["parcela"],
                     "recinto": parcela["recinto"],
                     "referencia_sigpac": referencia,
+                    "referencia_sigpac_compacta": referencia_compacta,
                     "superficie_sigpac": superficie_sigpac,
+                    "superficie_mapa": (
+                        f"{_formatear_superficie_mapa(superficie_sigpac)} ha"
+                        if superficie_sigpac is not None
+                        else "—"
+                    ),
                     "cultivos_texto": cultivos_texto,
+                    "tooltip_html": tooltip_html,
                     "especie": especies,
                     "variedad": variedades,
                     "sistema": sistemas,
@@ -868,19 +1198,15 @@ def render():
                     "fillOpacity": 0.45
                 },
                 tooltip=folium.GeoJsonTooltip(
-                    fields=[
-                        "nombre",
-                        "referencia_sigpac",
-                        "superficie_sigpac",
-                        "cultivos_texto"
-                    ],
-                    aliases=[
-                        "Parcela:",
-                        "SIGPAC:",
-                        "Superficie (ha):",
-                        "Cultivos:"
-                    ],
-                    sticky=True
+                    fields=["tooltip_html"],
+                    aliases=[""],
+                    labels=False,
+                    sticky=True,
+                    max_width=420,
+                    style=(
+                        "max-width:360px;font-size:12px;line-height:1.25;"
+                        "padding:6px 8px;"
+                    ),
                 ),
                 popup=folium.GeoJsonPopup(
                     fields=[
