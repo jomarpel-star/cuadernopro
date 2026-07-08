@@ -1,0 +1,32 @@
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/x-icon "access plus 30 days"
+  ExpiresDefault "access plus 1 day"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|png|ico)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+</IfModule>
+
+# Redirección opcional de www a dominio principal.
+# Actívala solo si Plesk no gestiona ya esta redirección.
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteCond %{HTTP_HOST} ^www\.cuadernopro\.es$ [NC]
+#   RewriteRule ^(.*)$ https://cuadernopro.es/$1 [R=301,L]
+# </IfModule>
+
+# HTTPS opcional.
+# Normalmente es mejor dejar que Plesk y Let's Encrypt lo gestionen.
+# <IfModule mod_rewrite.c>
+#   RewriteEngine On
+#   RewriteCond %{HTTPS} !=on
+#   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# </IfModule>

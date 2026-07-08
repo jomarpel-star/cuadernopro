@@ -1,0 +1,59 @@
+﻿; Inno Setup script for CuadernoPro.
+; build_installer_windows.ps1 writes this file from CuadernoPro.iss.template.
+
+#define AppName "CuadernoPro"
+#define AppVersion "8.3.1"
+#define AppPublisher "CuadernoPro"
+#define AppExeName "CuadernoPro.exe"
+#define SourceDir "..\..\dist_windows\CuadernoPro"
+#define InstallerOutputDir "..\..\packaging\windows\output"
+#define BrandingIconFile "..\..\assets\branding\cuadernopro.ico"
+
+[Setup]
+AppId={{7B28F3D2-4F4C-4E39-9C84-21B5D9901C2F}
+AppName={#AppName}
+AppVersion={#AppVersion}
+AppPublisher={#AppPublisher}
+DefaultDirName={localappdata}\Programs\{#AppName}
+DefaultGroupName={#AppName}
+DisableProgramGroupPage=yes
+OutputDir={#InstallerOutputDir}
+OutputBaseFilename={#AppName}-{#AppVersion}-Setup
+Compression=lzma2
+SolidCompression=yes
+WizardStyle=modern
+PrivilegesRequired=lowest
+#if FileExists(BrandingIconFile)
+SetupIconFile={#BrandingIconFile}
+#endif
+UninstallDisplayIcon={app}\{#AppExeName}
+ArchitecturesInstallIn64BitMode=x64compatible
+LicenseFile=..\..\LICENSE
+
+[Languages]
+Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "Crear acceso directo en el escritorio"; GroupDescription: "Accesos directos:"
+
+[Files]
+Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\..\LICENSE"; DestDir: "{app}\docs"; Flags: ignoreversion
+Source: "..\..\DISCLAIMER.md"; DestDir: "{app}\docs"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "..\..\TRADEMARKS.md"; DestDir: "{app}\docs"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "..\..\README.md"; DestDir: "{app}\docs"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "..\..\RELEASE_NOTES.md"; DestDir: "{app}\docs"; Flags: ignoreversion skipifsourcedoesntexist
+
+[Icons]
+Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\{#AppExeName}"
+Name: "{group}\Desinstalar {#AppName}"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\{#AppExeName}"; Tasks: desktopicon
+
+[Run]
+Filename: "{app}\{#AppExeName}"; Description: "Iniciar {#AppName}"; Flags: nowait postinstall skipifsilent
+
+; Intencion expresa:
+; - No instalar datos reales dentro de {app}.
+; - No borrar Documents\CuadernoPro al desinstalar.
+; - No usar UninstallDelete para carpetas de datos del usuario.
+

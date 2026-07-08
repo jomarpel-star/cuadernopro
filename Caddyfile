@@ -1,0 +1,9 @@
+{$CUADERNOPRO_DOMAIN} {
+    encode gzip zstd
+
+    basic_auth {
+        {$CUADERNOPRO_PROXY_USER} {$CUADERNOPRO_PROXY_PASSWORD_HASH}
+    }
+
+    reverse_proxy cuadernopro:8501
+}

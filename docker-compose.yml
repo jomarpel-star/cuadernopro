@@ -1,0 +1,36 @@
+name: ${COMPOSE_PROJECT_NAME:-cuadernopro}
+
+services:
+  cuadernopro:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${CUADERNOPRO_BIND_ADDRESS:-127.0.0.1}:${CUADERNOPRO_PORT:-8503}:8501"
+    environment:
+      - TZ=Europe/Madrid
+      - PYTHONUNBUFFERED=1
+      - CUADERNOPRO_DB_PATH=/app/runtime/cuadernopro.db
+      - CUADERNOPRO_BACKUPS_DIR=/app/runtime/backups
+      - CUADERNOPRO_EXPORTS_DIR=/app/runtime/exports
+      - CUADERNOPRO_DOCUMENTOS_DIR=/app/runtime/documentos
+    volumes:
+      - ./runtime:/app/runtime
+
+  caddy:
+    image: caddy:2
+    profiles:
+      - proxy
+    restart: unless-stopped
+    ports:
+      - "${CUADERNOPRO_PROXY_HTTP_PORT:-80}:80"
+      - "${CUADERNOPRO_PROXY_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./runtime/caddy/data:/data
+      - ./runtime/caddy/config:/config
+    environment:
+      - CUADERNOPRO_DOMAIN=${CUADERNOPRO_DOMAIN:-}
+      - CUADERNOPRO_PROXY_USER=${CUADERNOPRO_PROXY_USER:-}
+      - CUADERNOPRO_PROXY_PASSWORD_HASH=${CUADERNOPRO_PROXY_PASSWORD_HASH:-}
+    depends_on:
+      - cuadernopro

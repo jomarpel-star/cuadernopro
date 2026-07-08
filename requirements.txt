@@ -1,0 +1,13 @@
+streamlit
+pandas
+requests
+folium
+streamlit-folium
+openpyxl
+python-docx
+xlrd
+geopandas
+shapely
+owslib
+reportlab
+pypdf
