@@ -70,8 +70,20 @@
 
         <h3>Comprobar SHA256</h3>
         <p>La comprobación SHA256 es opcional, pero recomendable para verificar que el archivo descargado coincide con el publicado.</p>
-        <p class="code">Get-FileHash .\CuadernoPro-8.4.6-Setup.exe -Algorithm SHA256</p>
-        <p>Compara el resultado con el contenido de <code>SHA256SUMS.txt</code>.</p>
+        <p class="code">certutil -hashfile CuadernoPro-8.4.6-Setup.exe SHA256</p>
+        <p>Compara el resultado con el archivo <code>SHA256SUMS.txt</code> publicado en la release de GitHub.</p>
+
+        <h3>Aviso de Windows al instalar</h3>
+        <p>Windows puede mostrar un aviso de seguridad al descargar o ejecutar CuadernoPro porque el instalador todavía no está firmado digitalmente y el proyecto es reciente.</p>
+        <p>Este aviso no significa necesariamente que el programa sea peligroso. Indica que Windows no reconoce aún al editor o que el archivo no tiene reputación suficiente.</p>
+        <p>Para instalar con seguridad:</p>
+        <ol>
+          <li>Descarga CuadernoPro solo desde esta página oficial o desde GitHub Releases.</li>
+          <li>Comprueba que el archivo se llama <code>CuadernoPro-8.4.6-Setup.exe</code>.</li>
+          <li>Verifica el SHA256 publicado en la release.</li>
+          <li>Si confías en el origen, en el aviso de Windows pulsa <strong>Más información</strong> y después <strong>Ejecutar de todas formas</strong>.</li>
+        </ol>
+        <p>Estamos estudiando la firma digital del instalador para futuras versiones.</p>
 
         <h3>Dónde se guardan los datos</h3>
         <p>En Windows instalado, CuadernoPro guarda la base de datos, documentos, copias de seguridad, exportaciones y datos de trabajo en:</p>
@@ -96,6 +108,7 @@
         <span>Sin garantía</span>
         <span>Datos locales</span>
         <a href="https://github.com/jomarpel-star/cuadernopro">GitHub</a>
+        <a href="politica-cookies.html">Cookies</a>
         <a href="privacidad.html">Privacidad</a>
       </div>
       <p class="fine-print">CuadernoPro no es una aplicación oficial de la administración. El usuario conserva la responsabilidad sobre sus datos, copias de seguridad y obligaciones documentales.</p>

@@ -22,6 +22,13 @@ CuadernoPro no sube datos automáticamente a servidores externos. La base SQLite
 documentos, copias de seguridad y exportaciones permanecen bajo control del
 usuario.
 
+## Cookies
+
+La web pública de CuadernoPro no usa cookies propias de análisis, publicidad o
+seguimiento. La política de cookies está documentada en
+`docs/web/politica-cookies.md` y en la página pública
+`web_publica/politica-cookies.html`.
+
 ## Control del usuario
 
 El usuario decide qué datos introduce, qué documentos adjunta, qué copias de

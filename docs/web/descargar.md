@@ -22,10 +22,31 @@ el archivo descargado coincide con el publicado.
 En Windows PowerShell:
 
 ```powershell
-Get-FileHash .\CuadernoPro-8.4.6-Setup.exe -Algorithm SHA256
+certutil -hashfile CuadernoPro-8.4.6-Setup.exe SHA256
 ```
 
-Compara el resultado con `SHA256SUMS.txt`.
+Compara el resultado con el archivo `SHA256SUMS.txt` publicado en la release de
+GitHub.
+
+## Aviso de Windows al instalar
+
+Windows puede mostrar un aviso de seguridad al descargar o ejecutar CuadernoPro
+porque el instalador todavía no está firmado digitalmente y el proyecto es
+reciente.
+
+Este aviso no significa necesariamente que el programa sea peligroso. Indica
+que Windows no reconoce aún al editor o que el archivo no tiene reputación
+suficiente.
+
+Para instalar con seguridad:
+
+1. Descarga CuadernoPro solo desde esta página oficial o desde GitHub Releases.
+2. Comprueba que el archivo se llama `CuadernoPro-8.4.6-Setup.exe`.
+3. Verifica el SHA256 publicado en la release.
+4. Si confías en el origen, en el aviso de Windows pulsa `Más información` y
+   después `Ejecutar de todas formas`.
+
+Estamos estudiando la firma digital del instalador para futuras versiones.
 
 ## Instalar
 
