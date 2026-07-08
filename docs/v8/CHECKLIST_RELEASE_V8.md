@@ -47,8 +47,8 @@ Cambios previstos:
 - [x] `core/version.py` actualizado a `8.4.0`.
 - [x] `scripts/probar_release_v8.py` espera `8.4.0`.
 - [x] `README.md` revisado para publicación inicial.
-- [x] Texto de GitHub Release v8.3.3 creado en
-  `docs/publicacion/RELEASE_GITHUB_V8_3_3.md`.
+- [x] Texto de GitHub Release v8.4.6 creado en
+  `docs/publicacion/RELEASE_GITHUB_V8_4_6.md`.
 - [x] Textos web creados en `docs/web/`.
 - [x] Textos de difusión creados en
   `docs/publicacion/TEXTOS_DIFUSION.md`.

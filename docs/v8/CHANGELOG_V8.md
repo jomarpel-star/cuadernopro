@@ -102,8 +102,8 @@ versionado visible actualizado. No cambia funcionalidad.
 - `scripts/probar_release_v8.py` espera `8.4.0`.
 - `README.md` se revisa para explicar desde el inicio que CuadernoPro es
   software libre, gratuito para agricultores, local, sin cuotas ni activación.
-- Se crea `docs/publicacion/RELEASE_GITHUB_V8_3_3.md` con el texto recomendado
-  para la release pública v8.3.3.
+- Se crea `docs/publicacion/RELEASE_GITHUB_V8_4_6.md` con el texto recomendado
+  para la release pública v8.4.6.
 - Se crean textos base para `cuadernopro.es` en `docs/web/`.
 - Se crean textos de difusión en `docs/publicacion/TEXTOS_DIFUSION.md`.
 - Se crea checklist de capturas pendientes en

@@ -179,4 +179,4 @@ Antes de publicar cambios o preparar una release, revisa:
 - [docs/v8/CHANGELOG_V8.md](docs/v8/CHANGELOG_V8.md)
 - [docs/siex/README_SIEX.md](docs/siex/README_SIEX.md)
 - [docs/web/index.md](docs/web/index.md)
-- [docs/publicacion/RELEASE_GITHUB_V8_3_3.md](docs/publicacion/RELEASE_GITHUB_V8_3_3.md)
+- [docs/publicacion/RELEASE_GITHUB_V8_4_6.md](docs/publicacion/RELEASE_GITHUB_V8_4_6.md)
