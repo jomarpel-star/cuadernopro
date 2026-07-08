@@ -9,7 +9,7 @@ import time
 
 APP_ROOT = Path(__file__).resolve().parents[1]
 DB_RELEASE_V8 = APP_ROOT / "runtime" / "v8" / "prueba_release_v8.db"
-VERSION_ESPERADA = "8.4.3"
+VERSION_ESPERADA = "8.4.4"
 
 
 PRUEBAS = [
@@ -39,6 +39,10 @@ PRUEBAS = [
     (
         "PDF portada y backup documental v8.3.3",
         ["scripts/probar_pdf_portada_y_backup_docs_v8.py"],
+    ),
+    (
+        "PDF parcelas unicas v8.4.4",
+        ["scripts/probar_pdf_parcelas_unicas_v8.py"],
     ),
     ("Persistencia editores", ["scripts/probar_persistencia_editores_v7.py"]),
     ("Pre-v8 completo", ["scripts/probar_pre_v8_v7_14.py"]),

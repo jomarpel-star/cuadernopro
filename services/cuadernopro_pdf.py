@@ -651,6 +651,193 @@ def _entero_orden_pdf(valor):
     return int(numero)
 
 
+def _entero_o_none_pdf(valor):
+
+    numero = pd.to_numeric(valor, errors="coerce")
+
+    if pd.isna(numero):
+
+        return None
+
+    return int(numero)
+
+
+def _normalizar_clave_sigpac(valor):
+
+    texto = limpiar_texto_pdf(valor)
+
+    if not texto:
+
+        return ""
+
+    numero = pd.to_numeric(texto, errors="coerce")
+
+    if not pd.isna(numero) and float(numero).is_integer():
+
+        return str(int(numero))
+
+    texto = unicodedata.normalize("NFKD", texto).upper()
+    return "".join(
+        caracter
+        for caracter in texto
+        if not unicodedata.combining(caracter)
+    )
+
+
+def _clave_sigpac_fila(fila):
+
+    return tuple(
+        _normalizar_clave_sigpac(fila.get(campo))
+        for campo in [
+            "provincia_sigpac",
+            "municipio_sigpac",
+            "agregado_sigpac",
+            "zona_sigpac",
+            "poligono",
+            "parcela",
+            "recinto",
+        ]
+    )
+
+
+def _clave_deduplicacion_parcela(fila):
+
+    parcela_id = _entero_o_none_pdf(fila.get("id"))
+
+    if parcela_id is not None:
+
+        return ("id", parcela_id)
+
+    return ("sigpac", _clave_sigpac_fila(fila))
+
+
+def _valor_agronomico(valor, mayusculas=False):
+
+    texto = limpiar_texto_pdf(valor)
+
+    if not texto:
+
+        return ""
+
+    if texto.casefold() in {"none", "nan", "null"}:
+
+        return ""
+
+    if mayusculas:
+
+        texto = texto.upper()
+
+    return texto
+
+
+def _combinar_valores_unicos(valores, mayusculas=False):
+
+    vistos = set()
+    resultado = []
+
+    for valor in valores:
+
+        texto = _valor_agronomico(valor, mayusculas=mayusculas)
+
+        if not texto:
+
+            continue
+
+        clave = _clave_texto(texto)
+
+        if clave in vistos:
+
+            continue
+
+        vistos.add(clave)
+        resultado.append(texto)
+
+    return " / ".join(resultado)
+
+
+def _primer_valor_campos(fila, campos, mayusculas=False):
+
+    for campo in campos:
+
+        texto = _valor_agronomico(fila.get(campo), mayusculas=mayusculas)
+
+        if texto:
+
+            return texto
+
+    return ""
+
+
+def _entradas_relevantes_campana(entradas, campana_id):
+
+    if campana_id is None:
+
+        return entradas
+
+    actuales = []
+
+    for entrada in entradas:
+
+        cultivo = entrada.get("cultivo") or {}
+        cultivo_campana_id = _entero_o_none_pdf(cultivo.get("campana_id"))
+
+        if cultivo_campana_id == int(campana_id):
+
+            actuales.append(entrada)
+
+    return actuales or entradas
+
+
+def _superficie_cultivada_parcela(parcela, entradas):
+
+    superficie_parcela = _numero(parcela.get("superficie_cultivada"))
+
+    if superficie_parcela:
+
+        return superficie_parcela
+
+    superficies = []
+    vistos = set()
+
+    for entrada in entradas:
+
+        relacion = entrada.get("relacion") or {}
+        cultivo = entrada.get("cultivo") or {}
+        superficie = _numero(
+            relacion.get("superficie")
+            or cultivo.get("superficie")
+        )
+
+        if not superficie:
+
+            continue
+
+        clave = (
+            _entero_o_none_pdf(cultivo.get("id")),
+            round(superficie, 6),
+        )
+
+        if clave in vistos:
+
+            continue
+
+        vistos.add(clave)
+        superficies.append(superficie)
+
+    if superficies:
+
+        total = sum(superficies)
+        superficie_sigpac = _numero(parcela.get("superficie_sigpac"))
+
+        if superficie_sigpac and total > superficie_sigpac:
+
+            return superficie_sigpac
+
+        return total
+
+    return parcela.get("superficie_sigpac", "")
+
+
 def _etiqueta_cultivo_pdf(fila):
 
     if not fila:
@@ -664,7 +851,7 @@ def _etiqueta_cultivo_pdf(fila):
     )
 
 
-def _parcelas_y_orden():
+def obtener_parcelas_unicas_para_cuaderno(campana_id=None):
 
     conn = conectar()
 
@@ -673,6 +860,7 @@ def _parcelas_y_orden():
         parcelas = _leer_tabla_conn_pdf(conn, "parcelas")
         cultivos = _leer_tabla_conn_pdf(conn, "cultivos")
         cultivo_parcelas = _leer_tabla_conn_pdf(conn, "cultivo_parcelas")
+        explotacion = _leer_tabla_conn_pdf(conn, "explotacion")
 
     finally:
 
@@ -683,20 +871,23 @@ def _parcelas_y_orden():
         return [], {}
 
     cultivos_por_id = _mapa_por_id_pdf(cultivos)
-    cultivos_por_parcela = {}
+    entradas_por_parcela = {}
 
     if not cultivos.empty and "parcela_id" in cultivos.columns:
 
         for _, cultivo in cultivos.iterrows():
 
-            parcela_id = pd.to_numeric(cultivo.get("parcela_id"), errors="coerce")
+            parcela_id = _entero_o_none_pdf(cultivo.get("parcela_id"))
 
-            if not pd.isna(parcela_id):
+            if parcela_id is not None:
 
-                cultivos_por_parcela.setdefault(
-                    int(parcela_id),
+                entradas_por_parcela.setdefault(
+                    parcela_id,
                     [],
-                ).append(cultivo.to_dict())
+                ).append({
+                    "cultivo": cultivo.to_dict(),
+                    "relacion": {},
+                })
 
     if (
         not cultivo_parcelas.empty
@@ -706,76 +897,169 @@ def _parcelas_y_orden():
 
         for _, relacion in cultivo_parcelas.iterrows():
 
-            parcela_id = pd.to_numeric(
-                relacion.get("parcela_id"),
-                errors="coerce",
-            )
-            cultivo_id = pd.to_numeric(
-                relacion.get("cultivo_id"),
-                errors="coerce",
-            )
+            parcela_id = _entero_o_none_pdf(relacion.get("parcela_id"))
+            cultivo_id = _entero_o_none_pdf(relacion.get("cultivo_id"))
 
-            if pd.isna(parcela_id) or pd.isna(cultivo_id):
+            if parcela_id is None or cultivo_id is None:
 
                 continue
 
-            cultivo = cultivos_por_id.get(int(cultivo_id))
+            cultivo = cultivos_por_id.get(cultivo_id)
 
             if cultivo:
 
-                cultivos_por_parcela.setdefault(
-                    int(parcela_id),
+                entradas_por_parcela.setdefault(
+                    parcela_id,
                     [],
-                ).append(cultivo)
+                ).append({
+                    "cultivo": cultivo,
+                    "relacion": relacion.to_dict(),
+                })
 
-    filas = []
+    explotacion_fila = (
+        explotacion.iloc[0].to_dict()
+        if not explotacion.empty
+        else {}
+    )
+    sistema_explotacion = _primer_valor_campos(
+        explotacion_fila,
+        ["tipo_explotacion", "sistema", "sistema_explotacion"],
+        mayusculas=True,
+    )
+    parcelas_unicas = {}
 
-    for _, parcela in parcelas.sort_values("id").iterrows():
+    for _, parcela in parcelas.iterrows():
 
-        parcela_id = pd.to_numeric(parcela.get("id"), errors="coerce")
+        parcela_id = _entero_o_none_pdf(parcela.get("id"))
 
-        if pd.isna(parcela_id):
+        if parcela_id is None:
 
             continue
 
-        cultivos_parcela = cultivos_por_parcela.get(int(parcela_id), [{}])
+        entradas = _entradas_relevantes_campana(
+            entradas_por_parcela.get(parcela_id, []),
+            campana_id,
+        )
+        fila = parcela.to_dict()
+        fila["provincia"] = fila.get("provincia") or fila.get(
+            "provincia_sigpac",
+            "",
+        )
+        fila["municipio"] = fila.get("municipio") or fila.get(
+            "municipio_sigpac",
+            "",
+        )
+        fila["superficie_cultivada"] = _superficie_cultivada_parcela(
+            fila,
+            entradas,
+        )
 
-        for cultivo in cultivos_parcela:
+        cultivos_parcela = [
+            entrada.get("cultivo") or {}
+            for entrada in entradas
+        ]
+        relaciones_parcela = [
+            entrada.get("relacion") or {}
+            for entrada in entradas
+        ]
+        sistema_parcela = _primer_valor_campos(
+            fila,
+            [
+                "sistema",
+                "sistema_cultivo",
+                "sistema_explotacion",
+                "tipo_explotacion",
+            ],
+            mayusculas=True,
+        )
+        sistemas_cultivo = _combinar_valores_unicos(
+            [
+                _primer_valor_campos(
+                    cultivo,
+                    [
+                        "sistema",
+                        "sistema_cultivo",
+                        "sistema_explotacion",
+                        "tipo_explotacion",
+                    ],
+                    mayusculas=True,
+                )
+                for cultivo in cultivos_parcela
+            ],
+            mayusculas=True,
+        )
+        sistemas_relacion = _combinar_valores_unicos(
+            [
+                _primer_valor_campos(
+                    relacion,
+                    [
+                        "sistema",
+                        "sistema_cultivo",
+                        "sistema_explotacion",
+                        "tipo_explotacion",
+                    ],
+                    mayusculas=True,
+                )
+                for relacion in relaciones_parcela
+            ],
+            mayusculas=True,
+        )
 
-            fila = parcela.to_dict()
-            fila["provincia"] = fila.get("provincia") or fila.get(
-                "provincia_sigpac",
-                "",
-            )
-            fila["municipio"] = fila.get("municipio") or fila.get(
-                "municipio_sigpac",
-                "",
-            )
-            fila["superficie_cultivada"] = fila.get(
-                "superficie_cultivada",
-                "",
-            ) or fila.get("superficie_sigpac", "")
-            fila["especie"] = cultivo.get("especie") or cultivo.get("nombre", "")
-            fila["variedad"] = cultivo.get("variedad", "")
-            fila["sistema"] = cultivo.get("sistema", "")
-            fila["marco_plantacion"] = (
-                cultivo.get("marco_plantacion")
-                or cultivo.get("marco", "")
-            )
-            fila["numero_arboles"] = (
-                cultivo.get("numero_arboles")
-                or cultivo.get("arboles", "")
-            )
-            filas.append(fila)
+        fila["especie"] = _combinar_valores_unicos(
+            [
+                cultivo.get("especie") or cultivo.get("nombre")
+                for cultivo in cultivos_parcela
+            ]
+        )
+        fila["variedad"] = _combinar_valores_unicos(
+            [cultivo.get("variedad") for cultivo in cultivos_parcela]
+        )
+        fila["sistema"] = (
+            sistema_parcela
+            or sistemas_cultivo
+            or sistemas_relacion
+            or sistema_explotacion
+        )
+        fila["marco_plantacion"] = _combinar_valores_unicos(
+            [
+                cultivo.get("marco_plantacion") or cultivo.get("marco")
+                for cultivo in cultivos_parcela
+            ]
+        )
+        fila["numero_arboles"] = _combinar_valores_unicos(
+            [
+                cultivo.get("numero_arboles") or cultivo.get("arboles")
+                for cultivo in cultivos_parcela
+                if _numero(cultivo.get("numero_arboles") or cultivo.get("arboles"))
+            ]
+        )
+        parcelas_unicas.setdefault(_clave_deduplicacion_parcela(fila), fila)
 
     orden_parcelas = {}
+    filas = sorted(
+        parcelas_unicas.values(),
+        key=lambda fila: (
+            _clave_sigpac_fila(fila),
+            _entero_o_none_pdf(fila.get("id")) or 0,
+        ),
+    )
 
     for indice, fila in enumerate(filas, start=1):
 
         fila["_orden"] = indice
-        orden_parcelas.setdefault(int(fila["id"]), indice)
+
+        parcela_id = _entero_o_none_pdf(fila.get("id"))
+
+        if parcela_id is not None:
+
+            orden_parcelas.setdefault(parcela_id, indice)
 
     return filas, orden_parcelas
+
+
+def _parcelas_y_orden(campana_id=None):
+
+    return obtener_parcelas_unicas_para_cuaderno(campana_id)
 
 
 def _personas():
@@ -1692,7 +1976,7 @@ def _parcelas_unicas(parcelas):
 
     for fila in parcelas:
 
-        parcela_id = fila.get("id")
+        parcela_id = _clave_deduplicacion_parcela(fila)
 
         if parcela_id not in unicas:
 
@@ -2398,7 +2682,7 @@ def generar_cuadernopro_pdf(campana_id):
     campana = _campana(campana_id)
     explotacion = _datos_explotacion()
     titular = _valor(explotacion, "titular", "nombre_explotacion")
-    parcelas, orden_parcelas = _parcelas_y_orden()
+    parcelas, orden_parcelas = _parcelas_y_orden(campana_id)
     personas = _personas()
     equipos = _equipos()
     tratamientos = _tratamientos(campana_id)
@@ -2544,7 +2828,7 @@ def generar_cuadernopro_pdf(campana_id):
             numero_es(fila.get("superficie_cultivada")),
             abreviar_cultivo(fila.get("especie"), 50),
             abreviar_texto_largo(fila.get("variedad"), 55),
-            abreviar_cultivo(fila.get("sistema"), 35),
+            abreviar_texto_largo(fila.get("sistema"), 35),
             abreviar_texto_largo(
                 " / ".join(
                     parte
