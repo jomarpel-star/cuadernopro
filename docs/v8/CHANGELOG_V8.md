@@ -1,5 +1,33 @@
 # Changelog CuadernoPro v8
 
+## v8.4.6 - Release publica recomendada
+
+### Resumen
+
+Se prepara la release publica recomendada para Windows con correcciones en el
+cuaderno oficial, gestion mas segura de campanas activas y mapas mas claros. No
+cambia el modelo de datos de usuario y no requiere migracion manual.
+
+### Cambios
+
+- Se corrigen duplicados de parcelas en el cuaderno oficial.
+- La seccion de identificacion de parcelas lista cada recinto una sola vez.
+- Se corrige el campo Sistema en la tabla de parcelas del cuaderno oficial.
+- Se mejora la activacion y desactivacion de campanas activas con confirmacion
+  explicita.
+- Se evita usar una campana como activa de forma silenciosa cuando no hay
+  ninguna activada.
+- En mapas, el tooltip de parcelas es mas compacto.
+- En mapas, los cultivos del tooltip se filtran por campana activa.
+- En mapas, el numero de arboles se formatea correctamente.
+- El instalador recomendado pasa a ser `CuadernoPro-8.4.6-Setup.exe`.
+
+### Compatibilidad
+
+- No cambia el modelo de datos de usuario.
+- No requiere migracion manual.
+- Los datos existentes se conservan.
+
 ## v8.4.2 - Web pública estática para Plesk
 
 ### Resumen
@@ -531,9 +559,3 @@ con instalación limpia, Docker, persistencia SQLite y salidas principales.
 - Script de validación `scripts/probar_release_v8.py`.
 - Prueba `scripts/probar_importacion_catalogos_siex_v8.py`.
 - ZIP limpio previsto con `git archive` desde el commit/tag de release.
-
-### v8.4.3
-
-- Alinea la versión pública, la web y el instalador Windows.
-- El instalador recomendado pasa a ser `CuadernoPro-8.4.3-Setup.exe`.
-- No cambia el modelo de datos.

@@ -5,7 +5,7 @@
 Descarga el instalador desde la release pública:
 
 ```text
-CuadernoPro-8.4.3-Setup.exe
+CuadernoPro-8.4.6-Setup.exe
 ```
 
 También se pública:
@@ -22,14 +22,14 @@ el archivo descargado coincide con el publicado.
 En Windows PowerShell:
 
 ```powershell
-Get-FileHash .\CuadernoPro-8.4.3-Setup.exe -Algorithm SHA256
+Get-FileHash .\CuadernoPro-8.4.6-Setup.exe -Algorithm SHA256
 ```
 
 Compara el resultado con `SHA256SUMS.txt`.
 
 ## Instalar
 
-1. Ejecuta `CuadernoPro-8.4.3-Setup.exe`.
+1. Ejecuta `CuadernoPro-8.4.6-Setup.exe`.
 2. Sigue el asistente.
 3. Abre CuadernoPro desde el acceso directo.
 

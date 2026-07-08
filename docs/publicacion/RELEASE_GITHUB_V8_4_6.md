@@ -1,10 +1,15 @@
-# CuadernoPro v8.4.3
+# CuadernoPro v8.4.6
 
-Primera versión instalable para Windows de CuadernoPro.
+Release publica recomendada para Windows de CuadernoPro.
 
 CuadernoPro es el cuaderno agrícola libre para que ningún agricultor se quede
 sin herramienta. Esta versión permite instalar y usar la aplicación en Windows
 sin Docker, WSL, Python ni terminal.
+
+Esta version corrige duplicados de parcelas en el cuaderno oficial, mejora la
+activacion y desactivacion de campanas activas, y mejora los mapas con tooltip
+compacto, cultivos filtrados por campana activa y numero de arboles formateado
+correctamente.
 
 ## Incluye
 
@@ -23,12 +28,14 @@ sin Docker, WSL, Python ni terminal.
 
 ## Descargas
 
-- `CuadernoPro-8.4.3-Setup.exe`
+- `CuadernoPro-8.4.6-Setup.exe`
 - `SHA256SUMS.txt`
 
 ## Avisos importantes
 
-- Es una versión inicial pública.
+- No cambia el modelo de datos de usuario.
+- No requiere migracion manual.
+- Los datos existentes se conservan.
 - Revisa siempre los datos antes de presentarlos en trámites, inspecciones o
   comunicaciones oficiales.
 - Conserva tus propias copias de seguridad.

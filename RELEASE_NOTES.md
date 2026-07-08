@@ -1,5 +1,23 @@
 # CuadernoPro - Release notes
 
+## v8.4.6 - Release publica recomendada
+
+- Corrige duplicados de parcelas en el cuaderno oficial.
+- La seccion de identificacion de parcelas lista cada recinto una sola vez.
+- Corrige el campo Sistema en la tabla de parcelas del cuaderno oficial.
+- Mejora la activacion y desactivacion de campanas activas con confirmacion
+  explicita.
+- Evita usar una campana como activa de forma silenciosa cuando no hay ninguna
+  activada.
+- Mejora los mapas:
+  - tooltip mas compacto;
+  - cultivos filtrados por campana activa;
+  - numero de arboles formateado correctamente.
+- El instalador recomendado pasa a ser `CuadernoPro-8.4.6-Setup.exe`.
+- No cambia el modelo de datos de usuario.
+- No requiere migracion manual.
+- Los datos existentes se conservan.
+
 ## v8.4.2 - Web pública estática para Plesk
 
 - Crea `web_publica/` con una web estática inicial lista para subir a Plesk.
@@ -194,9 +212,3 @@ Documentación principal:
   actualizar.
 - El ZIP de código no debe incluir bases, backups, runtime, exports, documentos
   subidos ni temporales.
-
-### v8.4.3
-
-- Alinea la versión pública, la web y el instalador Windows.
-- El instalador recomendado pasa a ser `CuadernoPro-8.4.3-Setup.exe`.
-- No cambia el modelo de datos.
