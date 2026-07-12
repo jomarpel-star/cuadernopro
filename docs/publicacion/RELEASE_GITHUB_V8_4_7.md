@@ -1,46 +1,40 @@
-# CuadernoPro v8.4.6
+# CuadernoPro v8.4.7
 
-Release publica recomendada para Windows de CuadernoPro.
+Release pública recomendada para Windows de CuadernoPro.
 
 CuadernoPro es el cuaderno agrícola libre para que ningún agricultor se quede
 sin herramienta. Esta versión permite instalar y usar la aplicación en Windows
 sin Docker, WSL, Python ni terminal.
 
-Esta version corrige duplicados de parcelas en el cuaderno oficial, mejora la
-activacion y desactivacion de campanas activas, y mejora los mapas con tooltip
-compacto, cultivos filtrados por campana activa y numero de arboles formateado
-correctamente.
+Esta versión mejora el alta de parcelas: la provincia y el municipio se toman
+de la explotación y se convierten en sus códigos SIGPAC mediante el catálogo
+local. Si la ubicación no está configurada o no coincide, CuadernoPro solicita
+una selección manual en lugar de presuponer Murcia/Jumilla.
 
 ## Incluye
 
 - Instalador Windows.
 - Funcionamiento sin Docker ni WSL.
-- Base SQLite local.
-- Datos en `Documentos\CuadernoPro`.
+- Base SQLite local y datos en `Documentos\CuadernoPro`.
 - PDF oficial del cuaderno.
 - Backup completo con documentos adjuntos.
-- Importación de catálogos SIEX.
-- Exportación Excel SIEX asistida.
-- Revisión SIEX.
+- Importación de catálogos SIEX y revisión SIEX.
 - Mapas/SIGPAC.
-- Cultivos con cálculo de árboles.
 - Cosecha, tratamientos, fertilización y prácticas multicultivo.
 
 ## Descargas
 
-- `CuadernoPro-8.4.6-Setup.exe`
+- `CuadernoPro-8.4.7-Setup.exe`
 - `SHA256SUMS.txt`
 
 ## Avisos importantes
 
 - No cambia el modelo de datos de usuario.
-- No requiere migracion manual.
+- No requiere migración manual.
 - Los datos existentes se conservan.
 - Revisa siempre los datos antes de presentarlos en trámites, inspecciones o
   comunicaciones oficiales.
 - Conserva tus propias copias de seguridad.
-- Los catálogos SIEX oficiales se importan aparte desde el ZIP oficial que
-  corresponda.
 - CuadernoPro no es una aplicación oficial de la administración.
 
 ## Licencia

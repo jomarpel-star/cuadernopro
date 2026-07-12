@@ -1,5 +1,27 @@
 # Changelog CuadernoPro v8
 
+## v8.4.7 - Ubicación SIGPAC desde la explotación
+
+### Resumen
+
+El alta de parcelas deja de partir de Murcia/Jumilla y utiliza la provincia y
+el municipio guardados en la explotación para localizar los códigos SIGPAC.
+
+### Cambios
+
+- Se leen la provincia y el municipio de la explotación al abrir `Nueva
+  parcela`.
+- Se normalizan mayúsculas, tildes, espacios y códigos incluidos en el texto
+  antes de buscar en el catálogo SIGPAC local.
+- Si no se encuentra una coincidencia, se muestra una selección neutra en vez
+  de asignar una ubicación fija.
+
+### Compatibilidad
+
+- No cambia el modelo de datos de usuario.
+- No requiere migración manual.
+- Los datos existentes se conservan.
+
 ## v8.4.6 - Release publica recomendada
 
 ### Resumen

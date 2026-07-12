@@ -1,5 +1,6 @@
 import csv
 import re
+import unicodedata
 import warnings
 from functools import lru_cache
 from pathlib import Path
@@ -21,6 +22,22 @@ def _limpiar_texto(valor):
 
     texto = "" if valor is None else str(valor).strip()
     return re.sub(r"\s+", " ", texto)
+
+
+def _normalizar_nombre(valor):
+
+    texto = unicodedata.normalize("NFKD", _limpiar_texto(valor).casefold())
+    texto = "".join(
+        caracter
+        for caracter in texto
+        if not unicodedata.combining(caracter)
+    )
+    return re.sub(r"[^a-z0-9]+", " ", texto).strip()
+
+
+def _nombre_sin_codigo(valor):
+
+    return re.sub(r"^\s*\d+\s*[-:]\s*", "", _limpiar_texto(valor))
 
 
 def _fallback_catalogo(motivo=None):
@@ -200,6 +217,40 @@ def buscar_municipio_por_label(provincia_codigo, label):
     for municipio in obtener_municipios(provincia_codigo):
 
         if municipio["label"] == etiqueta:
+
+            return municipio
+
+    return None
+
+
+def buscar_provincia_por_nombre(nombre):
+
+    nombre_normalizado = _normalizar_nombre(_nombre_sin_codigo(nombre))
+
+    if not nombre_normalizado:
+
+        return None
+
+    for provincia in obtener_provincias():
+
+        if _normalizar_nombre(provincia["nombre"]) == nombre_normalizado:
+
+            return provincia
+
+    return None
+
+
+def buscar_municipio_por_nombre(provincia_codigo, nombre):
+
+    nombre_normalizado = _normalizar_nombre(_nombre_sin_codigo(nombre))
+
+    if not nombre_normalizado:
+
+        return None
+
+    for municipio in obtener_municipios(provincia_codigo):
+
+        if _normalizar_nombre(municipio["nombre"]) == nombre_normalizado:
 
             return municipio
 

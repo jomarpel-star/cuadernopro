@@ -5,7 +5,7 @@
 Descarga el instalador desde la release pública:
 
 ```text
-CuadernoPro-8.4.6-Setup.exe
+CuadernoPro-8.4.7-Setup.exe
 ```
 
 También se pública:
@@ -22,7 +22,7 @@ el archivo descargado coincide con el publicado.
 En Windows PowerShell:
 
 ```powershell
-certutil -hashfile CuadernoPro-8.4.6-Setup.exe SHA256
+certutil -hashfile CuadernoPro-8.4.7-Setup.exe SHA256
 ```
 
 Compara el resultado con el archivo `SHA256SUMS.txt` publicado en la release de
@@ -41,7 +41,7 @@ suficiente.
 Para instalar con seguridad:
 
 1. Descarga CuadernoPro solo desde esta página oficial o desde GitHub Releases.
-2. Comprueba que el archivo se llama `CuadernoPro-8.4.6-Setup.exe`.
+2. Comprueba que el archivo se llama `CuadernoPro-8.4.7-Setup.exe`.
 3. Verifica el SHA256 publicado en la release.
 4. Si confías en el origen, en el aviso de Windows pulsa `Más información` y
    después `Ejecutar de todas formas`.
@@ -50,7 +50,7 @@ Estamos estudiando la firma digital del instalador para futuras versiones.
 
 ## Instalar
 
-1. Ejecuta `CuadernoPro-8.4.6-Setup.exe`.
+1. Ejecuta `CuadernoPro-8.4.7-Setup.exe`.
 2. Sigue el asistente.
 3. Abre CuadernoPro desde el acceso directo.
 

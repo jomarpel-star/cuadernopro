@@ -1,5 +1,29 @@
 # Checklist release CuadernoPro v8
 
+## Release v8.4.7
+
+- Versión de producto visible: `8.4.7`.
+- Objetivo: heredar provincia y municipio SIGPAC desde la explotación.
+- Modelo de datos: sin cambios.
+- Migración manual: no necesaria.
+- Documentos reales de usuario: no se versionan.
+
+Cambios previstos:
+
+- [x] Eliminados los valores iniciales fijos Murcia/Jumilla de `Nueva parcela`.
+- [x] Ubicación de la explotación resuelta contra el catálogo SIGPAC local.
+- [x] Selección neutra cuando la ubicación está incompleta o no coincide.
+- [x] `core/version.py` actualizado a `8.4.7`.
+- [x] `scripts/probar_release_v8.py` espera `8.4.7`.
+
+Validaciones antes de publicar:
+
+- [ ] Compilación Python desde `.venv`.
+- [ ] Pruebas específicas de catálogo y ubicación.
+- [ ] `scripts/probar_release_v8.py`.
+- [ ] `git diff --check` y revisión de artefactos.
+- [ ] ZIP de código y ZIP web generados desde la etiqueta correcta.
+
 ## Release v8.4.1
 
 - Versión de producto visible: `8.4.0`.

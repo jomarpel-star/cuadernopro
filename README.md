@@ -41,10 +41,10 @@ Las capturas recomendadas para la publicación inicial están recogidas en
 
 ## Descarga
 
-La versión recomendada para instalar en Windows es CuadernoPro v8.4.6. La
+La versión recomendada para instalar en Windows es CuadernoPro v8.4.7. La
 release pública debe ofrecer:
 
-- `CuadernoPro-8.4.6-Setup.exe`
+- `CuadernoPro-8.4.7-Setup.exe`
 - `SHA256SUMS.txt`
 
 El instalador Windows deja los datos del usuario en:
@@ -53,12 +53,12 @@ El instalador Windows deja los datos del usuario en:
 Documentos\CuadernoPro
 ```
 
-CuadernoPro v8.4.6 prepara la descarga pública recomendada. No requiere
+CuadernoPro v8.4.7 prepara la descarga pública recomendada. No requiere
 migración manual y conserva los datos existentes.
 
 ## Instalación rápida
 
-1. Descargar `CuadernoPro-8.4.6-Setup.exe` desde la release publicada.
+1. Descargar `CuadernoPro-8.4.7-Setup.exe` desde la release publicada.
 2. Ejecutar el instalador.
 3. Abrir CuadernoPro desde el acceso directo creado.
 4. Completar los datos iniciales de la explotación.
@@ -179,4 +179,4 @@ Antes de publicar cambios o preparar una release, revisa:
 - [docs/v8/CHANGELOG_V8.md](docs/v8/CHANGELOG_V8.md)
 - [docs/siex/README_SIEX.md](docs/siex/README_SIEX.md)
 - [docs/web/index.md](docs/web/index.md)
-- [docs/publicacion/RELEASE_GITHUB_V8_4_6.md](docs/publicacion/RELEASE_GITHUB_V8_4_6.md)
+- [docs/publicacion/RELEASE_GITHUB_V8_4_7.md](docs/publicacion/RELEASE_GITHUB_V8_4_7.md)

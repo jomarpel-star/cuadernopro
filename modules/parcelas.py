@@ -14,10 +14,16 @@ from core.ui_tablas import (
 from services.sigpac import consultar_recinto_sigpac
 from services.sigpac_catalogo import (
     buscar_municipio_por_label,
+    buscar_municipio_por_nombre,
     buscar_provincia_por_label,
+    buscar_provincia_por_nombre,
     obtener_municipios,
     obtener_provincias,
 )
+
+
+SELECCIONA_PROVINCIA = "Selecciona una provincia"
+SELECCIONA_MUNICIPIO = "Selecciona un municipio"
 
 
 def _formatear_hectareas(valor):
@@ -46,17 +52,6 @@ def _referencia_sigpac(
     }
 
 
-def _label_por_codigo(opciones, codigo_buscado):
-
-    for opcion in opciones:
-
-        if opcion["codigo"] == codigo_buscado:
-
-            return opcion["label"]
-
-    return None
-
-
 def _tabla_existe_conn(conn, tabla):
 
     fila = conn.execute(
@@ -79,6 +74,59 @@ def _columnas_tabla_conn(conn, tabla):
         fila[1]
         for fila in conn.execute(f'PRAGMA table_info("{tabla}")')
     }
+
+
+def _ubicacion_explotacion():
+
+    conn = conectar()
+
+    try:
+
+        columnas = _columnas_tabla_conn(conn, "explotacion")
+
+        if "provincia" not in columnas:
+
+            return "", ""
+
+        columna_municipio = (
+            "municipio"
+            if "municipio" in columnas
+            else "localidad" if "localidad" in columnas else None
+        )
+
+        if columna_municipio is None:
+
+            return "", ""
+
+        fila = conn.execute(
+            f"""
+            SELECT COALESCE(provincia,''), COALESCE({columna_municipio},'')
+            FROM explotacion
+            ORDER BY id
+            LIMIT 1
+            """
+        ).fetchone()
+        return tuple(fila) if fila else ("", "")
+
+    finally:
+
+        conn.close()
+
+
+def _ubicacion_sigpac_explotacion():
+
+    provincia, municipio = _ubicacion_explotacion()
+    provincia_opcion = buscar_provincia_por_nombre(provincia)
+
+    if provincia_opcion is None:
+
+        return None, None
+
+    municipio_opcion = buscar_municipio_por_nombre(
+        provincia_opcion["codigo"],
+        municipio
+    )
+    return provincia_opcion, municipio_opcion
 
 
 def _expr_texto(tabla, columna, columnas, defecto="''"):
@@ -906,21 +954,30 @@ def render():
         )
 
         provincias = obtener_provincias()
-        etiquetas_provincias = [
+        etiquetas_provincias_catalogo = [
             provincia["label"]
             for provincia in provincias
         ]
 
-        if not etiquetas_provincias:
+        if not etiquetas_provincias_catalogo:
 
             st.error("No hay provincias SIGPAC configuradas.")
             st.stop()
 
+        etiquetas_provincias = [
+            SELECCIONA_PROVINCIA,
+            *etiquetas_provincias_catalogo,
+        ]
+        provincia_explotacion, municipio_explotacion = (
+            _ubicacion_sigpac_explotacion()
+        )
+
         if st.session_state.get(provincia_key) not in etiquetas_provincias:
 
             st.session_state[provincia_key] = (
-                _label_por_codigo(provincias, 30)
-                or etiquetas_provincias[0]
+                provincia_explotacion["label"]
+                if provincia_explotacion
+                else SELECCIONA_PROVINCIA
             )
 
         if superficie_pendiente_key in st.session_state:
@@ -970,24 +1027,32 @@ def render():
         if (
             etiquetas_municipios
             and st.session_state.get(municipio_key)
-            not in etiquetas_municipios
+            not in [SELECCIONA_MUNICIPIO, *etiquetas_municipios]
         ):
 
             st.session_state[municipio_key] = (
-                _label_por_codigo(municipios, 22)
-                if provincia_sigpac == 30
-                else None
-            ) or etiquetas_municipios[0]
+                municipio_explotacion["label"]
+                if (
+                    municipio_explotacion
+                    and provincia_explotacion
+                    and provincia_sigpac == provincia_explotacion["codigo"]
+                )
+                else SELECCIONA_MUNICIPIO
+            )
 
         if not etiquetas_municipios:
 
-            st.session_state[municipio_key] = (
-                "Selecciona provincia y municipio"
-            )
+            st.session_state[municipio_key] = SELECCIONA_MUNICIPIO
+
+        opciones_municipios = (
+            [SELECCIONA_MUNICIPIO, *etiquetas_municipios]
+            if etiquetas_municipios
+            else [SELECCIONA_MUNICIPIO]
+        )
 
         municipio_label = st.selectbox(
             "Municipio",
-            etiquetas_municipios or ["Selecciona provincia y municipio"],
+            opciones_municipios,
             disabled=not etiquetas_municipios,
             key=municipio_key
         )

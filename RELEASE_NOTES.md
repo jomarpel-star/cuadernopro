@@ -1,5 +1,18 @@
 # CuadernoPro - Release notes
 
+## v8.4.7 - Ubicación SIGPAC desde la explotación
+
+- La pantalla `Nueva parcela` propone la provincia y el municipio configurados
+  en la explotación.
+- Los nombres se resuelven contra el catálogo SIGPAC local para obtener sus
+  códigos oficiales, tolerando mayúsculas, tildes y códigos escritos junto al
+  nombre.
+- Si la ubicación está vacía o no coincide con el catálogo, no se presupone
+  Murcia/Jumilla: se solicita una selección manual.
+- No cambia el modelo de datos de usuario.
+- No requiere migración manual.
+- Los datos existentes se conservan.
+
 ## v8.4.6 - Release publica recomendada
 
 - Corrige duplicados de parcelas en el cuaderno oficial.
