@@ -29,7 +29,27 @@ Docker puede escribir en ella.
 
 ## Arranque
 
-Desde la carpeta del proyecto, ejecutar:
+La imagen oficial se publica en Docker Hub para Linux `amd64` y `arm64`:
+
+```text
+jomarpel74/cuadernopro
+```
+
+Desde la carpeta del proyecto, descargar y arrancar la release estable:
+
+```bash
+docker compose pull cuadernopro
+docker compose up -d --no-build
+```
+
+Para fijar una version concreta y evitar actualizaciones accidentales, crear
+un archivo `.env` a partir de `.env.example` y configurar, por ejemplo:
+
+```dotenv
+CUADERNOPRO_IMAGE_TAG=8.4.9
+```
+
+Si se quiere construir la imagen localmente desde el codigo fuente, ejecutar:
 
 ```bash
 docker compose up -d --build
@@ -63,7 +83,8 @@ CuadernoPro hacia Internet, revisa primero:
 Esa opción usa Caddy con el perfil `proxy`:
 
 ```bash
-docker compose --profile proxy up -d --build
+docker compose pull cuadernopro
+docker compose --profile proxy up -d --no-build
 ```
 
 No abras directamente a Internet el puerto de Streamlit (`8501` o el puerto
@@ -80,7 +101,8 @@ lo que permite tener varias instalaciones en el mismo servidor.
 Para una instalación normal, puede usarse la configuración por defecto:
 
 ```bash
-docker compose up -d --build
+docker compose pull cuadernopro
+docker compose up -d --no-build
 ```
 
 Para una segunda instalación en el mismo servidor:
@@ -152,5 +174,6 @@ Cuando el backup este verificado, ya se puede actualizar el código y volver a
 levantar el servicio con:
 
 ```bash
-docker compose up -d --build
+docker compose pull cuadernopro
+docker compose up -d --no-build
 ```

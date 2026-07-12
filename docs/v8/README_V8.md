@@ -109,12 +109,18 @@ y probarse en Windows.
 
 ## Instalación recomendada con Docker
 
-Desde la carpeta descomprimida o clonada:
+La imagen oficial `jomarpel74/cuadernopro` está disponible para Linux `amd64`
+y `arm64`. Desde la carpeta descomprimida o clonada:
 
 ```bash
-docker compose up -d --build
+docker compose pull cuadernopro
+docker compose up -d --no-build
 docker compose ps
 ```
+
+Para fijar una release concreta, configurar `CUADERNOPRO_IMAGE_TAG=8.4.9` en
+el archivo `.env`. Para construir desde el código fuente en lugar de descargar
+la imagen oficial, usar `docker compose up -d --build`.
 
 Con la configuración actual, la aplicación queda disponible en:
 
@@ -139,7 +145,8 @@ guía de proxy con Caddy.
 4. Ejecutar:
 
 ```bash
-docker compose up -d --build
+docker compose pull cuadernopro
+docker compose up -d --no-build
 ```
 
 5. Abrir `http://localhost:8503`.
@@ -198,10 +205,11 @@ de release ni deben versionarse en Git.
 1. Hacer backup de `runtime/`.
 2. Sustituir el código por la nueva versión.
 3. Mantener la carpeta `runtime/`.
-4. Reconstruir:
+4. Descargar la imagen actualizada y recrear el contenedor:
 
 ```bash
-docker compose up -d --build
+docker compose pull cuadernopro
+docker compose up -d --no-build
 ```
 
 Las bases v7 existentes reciben ampliaciones limpias idempotentes. Una

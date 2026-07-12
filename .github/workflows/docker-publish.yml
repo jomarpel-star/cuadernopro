@@ -1,0 +1,95 @@
+name: Publicar imagen Docker
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Etiqueta Git que se publicara (por ejemplo, v8.4.9)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-publish-${{ github.event_name == 'release' && github.event.release.tag_name || inputs.version }}
+  cancel-in-progress: false
+
+env:
+  IMAGE_NAME: jomarpel74/cuadernopro
+
+jobs:
+  publish:
+    name: Construir y publicar
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Determinar la version
+        id: release
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.version }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "La etiqueta debe tener el formato vX.Y.Z: $RELEASE_TAG" >&2
+            exit 1
+          fi
+
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${RELEASE_TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "major_minor=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}" >> "$GITHUB_OUTPUT"
+          echo "major=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+
+      - name: Descargar el codigo de la etiqueta
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.release.outputs.tag }}
+
+      - name: Registrar el commit publicado
+        id: source
+        shell: bash
+        run: echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Preparar emulacion multi-arquitectura
+        uses: docker/setup-qemu-action@v4
+
+      - name: Preparar Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Iniciar sesion en Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Preparar etiquetas y metadatos
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.release.outputs.version }}
+            type=raw,value=${{ steps.release.outputs.major_minor }}
+            type=raw,value=${{ steps.release.outputs.major }}
+            type=raw,value=latest
+          labels: |
+            org.opencontainers.image.title=CuadernoPro
+            org.opencontainers.image.description=Cuaderno agricola libre para gestionar la explotacion en local
+            org.opencontainers.image.url=https://github.com/jomarpel-star/cuadernopro
+            org.opencontainers.image.source=https://github.com/jomarpel-star/cuadernopro
+            org.opencontainers.image.version=${{ steps.release.outputs.version }}
+            org.opencontainers.image.revision=${{ steps.source.outputs.revision }}
+            org.opencontainers.image.licenses=GPL-3.0-or-later
+
+      - name: Construir y publicar la imagen
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

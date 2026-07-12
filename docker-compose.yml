@@ -2,7 +2,9 @@ name: ${COMPOSE_PROJECT_NAME:-cuadernopro}
 
 services:
   cuadernopro:
-    build: .
+    image: ${CUADERNOPRO_IMAGE:-jomarpel74/cuadernopro}:${CUADERNOPRO_IMAGE_TAG:-latest}
+    build:
+      context: .
     restart: unless-stopped
     ports:
       - "${CUADERNOPRO_BIND_ADDRESS:-127.0.0.1}:${CUADERNOPRO_PORT:-8503}:8501"
