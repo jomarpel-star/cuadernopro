@@ -1,5 +1,19 @@
 # CuadernoPro - Release notes
 
+## v8.4.9 - Radar y avisos legales completos
+
+- Mantiene la capa opcional de radar de lluvia animado sobre el mapa general.
+- Declara `branca` como dependencia directa.
+- Regenera el inventario de dependencias y licencias desde el entorno exacto
+  usado para construir el instalador.
+- Documenta las atribuciones y condiciones de SIGPAC, PNOA/IGN,
+  OpenStreetMap y RainViewer.
+- Incluye los avisos de terceros y las atribuciones externas dentro del paquete
+  Windows.
+- No cambia el modelo de datos de usuario.
+- No requiere migración manual.
+- Los datos existentes se conservan.
+
 ## v8.4.8 - Radar de lluvia animado en mapas
 
 - Añade una capa opcional de radar de lluvia sobre el mapa general de la

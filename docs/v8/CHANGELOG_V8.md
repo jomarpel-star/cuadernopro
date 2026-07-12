@@ -1,5 +1,30 @@
 # Changelog CuadernoPro v8
 
+## v8.4.9 - Radar y avisos legales completos
+
+### Resumen
+
+Se prepara una release reproducible del radar de lluvia que incorpora en el
+mismo commit la dependencia directa, el inventario actualizado de licencias,
+las atribuciones de datos externos y los textos públicos de descarga.
+
+### Cambios
+
+- Se mantiene la capa opcional de radar de lluvia de las últimas dos horas.
+- Se declara `branca` como dependencia directa.
+- Se genera `THIRD_PARTY_NOTICES.md` desde el entorno exacto de build.
+- Se documentan SIGPAC/FEGA, PNOA/IGN/SCNE, OpenStreetMap y RainViewer.
+- El empaquetado Windows incluye `ATRIBUCIONES_DATOS.md` junto a los demás
+  avisos legales.
+- La web pública y la documentación apuntan al instalador v8.4.9 y a su
+  `SHA256SUMS.txt`.
+
+### Compatibilidad
+
+- No cambia el modelo de datos de usuario.
+- No requiere migración manual.
+- Los datos existentes se conservan.
+
 ## v8.4.8 - Radar de lluvia animado en mapas
 
 ### Resumen

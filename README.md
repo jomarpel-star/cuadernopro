@@ -41,10 +41,10 @@ Las capturas recomendadas para la publicación inicial están recogidas en
 
 ## Descarga
 
-La versión recomendada para instalar en Windows es CuadernoPro v8.4.8. La
+La versión recomendada para instalar en Windows es CuadernoPro v8.4.9. La
 release pública debe ofrecer:
 
-- `CuadernoPro-8.4.8-Setup.exe`
+- `CuadernoPro-8.4.9-Setup.exe`
 - `SHA256SUMS.txt`
 
 El instalador Windows deja los datos del usuario en:
@@ -53,12 +53,13 @@ El instalador Windows deja los datos del usuario en:
 Documentos\CuadernoPro
 ```
 
-CuadernoPro v8.4.8 añade el radar de lluvia animado en mapas. No requiere
+CuadernoPro v8.4.9 añade el radar de lluvia animado en mapas y completa los
+avisos de dependencias, licencias y atribuciones externas. No requiere
 migración manual y conserva los datos existentes.
 
 ## Instalación rápida
 
-1. Descargar `CuadernoPro-8.4.8-Setup.exe` desde la release publicada.
+1. Descargar `CuadernoPro-8.4.9-Setup.exe` desde la release publicada.
 2. Ejecutar el instalador.
 3. Abrir CuadernoPro desde el acceso directo creado.
 4. Completar los datos iniciales de la explotación.

@@ -1,6 +1,6 @@
 # Avisos de terceros
 
-Inventario generado desde el entorno de build de CuadernoPro v8.4.8.
+Inventario generado desde el entorno de build de CuadernoPro v8.4.9.
 Incluye dependencias directas, transitivas y herramientas cuyos
 componentes se incorporan al ejecutable Windows. `pip` y `setuptools`
 se excluyen porque solo preparan el entorno y no se distribuyen.

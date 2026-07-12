@@ -9,7 +9,7 @@ import time
 
 APP_ROOT = Path(__file__).resolve().parents[1]
 DB_RELEASE_V8 = APP_ROOT / "runtime" / "v8" / "prueba_release_v8.db"
-VERSION_ESPERADA = "8.4.8"
+VERSION_ESPERADA = "8.4.9"
 
 
 PRUEBAS = [

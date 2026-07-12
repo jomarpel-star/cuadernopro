@@ -1,5 +1,33 @@
 # Checklist release CuadernoPro v8
 
+## Release v8.4.9
+
+- Versión de producto visible: `8.4.9`.
+- Objetivo: publicar el radar con dependencias, licencias, atribuciones y
+  artefactos generados desde un único commit etiquetado.
+- Modelo de datos: sin cambios.
+- Migración manual: no necesaria.
+- Documentos reales de usuario: no se versionan.
+
+Cambios previstos:
+
+- [x] `core/version.py` actualizado a `8.4.9`.
+- [x] `scripts/probar_release_v8.py` espera `8.4.9`.
+- [x] Dependencia directa `branca` declarada.
+- [x] Inventario de licencias reproducible y sin valores desconocidos.
+- [x] Atribuciones externas documentadas e incluidas en el paquete Windows.
+- [x] Web pública alineada con el instalador v8.4.9.
+
+Validaciones antes de publicar:
+
+- [ ] Compilación Python desde `.venv`.
+- [ ] Auditoría reproducible de dependencias y licencias.
+- [ ] `scripts/probar_release_v8.py`.
+- [ ] Build portable e instalador desde la etiqueta v8.4.9.
+- [ ] Instalación, HTTP, desinstalación y conservación de datos.
+- [ ] ZIP de código y ZIP Plesk sin elementos prohibidos.
+- [ ] SHA256 del instalador verificado.
+
 ## Release v8.4.8
 
 - Versión de producto visible: `8.4.8`.
