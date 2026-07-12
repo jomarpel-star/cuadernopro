@@ -15,6 +15,210 @@ from services.sigpac import (
 )
 
 
+def _agregar_radar_lluvia(mapa, folium):
+
+    from branca.element import MacroElement, Template
+
+    capa_radar = folium.FeatureGroup(
+        name="Radar de lluvia (últimas 2 h)",
+        overlay=True,
+        control=True,
+        show=False,
+    ).add_to(mapa)
+
+    class ControlRadarLluvia(MacroElement):
+
+        _template = Template(
+            """
+            {% macro script(this, kwargs) %}
+            (function () {
+                const map = {{ this._parent.get_name() }};
+                const radarGroup = {{ this.radar_group.get_name() }};
+                const apiUrl =
+                    "https://api.rainviewer.com/public/weather-maps.json";
+                let frames = [];
+                let currentFrame = -1;
+                let timer = null;
+                let radarVisible = false;
+
+                const control = L.control({position: "bottomleft"});
+                control.onAdd = function () {
+                    const container = L.DomUtil.create(
+                        "div",
+                        "cuadernopro-radar-control leaflet-bar"
+                    );
+                    container.style.display = "none";
+                    container.style.background = "rgba(255,255,255,0.96)";
+                    container.style.padding = "7px 9px";
+                    container.style.minWidth = "250px";
+                    container.style.boxShadow = "0 1px 5px rgba(0,0,0,0.35)";
+                    container.innerHTML = `
+                        <div style="font-weight:600;margin-bottom:5px;">
+                            Radar de lluvia
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <button type="button" data-action="previous"
+                                title="Imagen anterior" aria-label="Imagen anterior"
+                                style="width:30px;height:28px;">&#9664;</button>
+                            <button type="button" data-action="play"
+                                title="Reproducir" aria-label="Reproducir"
+                                style="width:34px;height:28px;">&#9654;</button>
+                            <button type="button" data-action="next"
+                                title="Imagen siguiente" aria-label="Imagen siguiente"
+                                style="width:30px;height:28px;">&#9654;|</button>
+                            <input type="range" min="0" max="0" value="0"
+                                aria-label="Momento del radar"
+                                style="flex:1;min-width:80px;">
+                        </div>
+                        <div data-role="time"
+                            style="font-size:12px;margin-top:5px;color:#374151;">
+                            Cargando radar…
+                        </div>`;
+                    L.DomEvent.disableClickPropagation(container);
+                    L.DomEvent.disableScrollPropagation(container);
+                    return container;
+                };
+                control.addTo(map);
+
+                const container = control.getContainer();
+                const slider = container.querySelector("input[type=range]");
+                const timeLabel = container.querySelector('[data-role="time"]');
+                const playButton = container.querySelector('[data-action="play"]');
+
+                function formatTime(unixTime) {
+                    return new Date(unixTime * 1000).toLocaleString("es-ES", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    });
+                }
+
+                function showFrame(index) {
+                    if (!frames.length) return;
+                    const normalized = (index + frames.length) % frames.length;
+                    if (currentFrame >= 0) {
+                        radarGroup.removeLayer(frames[currentFrame].layer);
+                    }
+                    currentFrame = normalized;
+                    radarGroup.addLayer(frames[currentFrame].layer);
+                    slider.value = String(currentFrame);
+                    timeLabel.textContent =
+                        "Observación: " + formatTime(frames[currentFrame].time);
+                }
+
+                function stop() {
+                    if (timer !== null) {
+                        window.clearInterval(timer);
+                        timer = null;
+                    }
+                    playButton.innerHTML = "&#9654;";
+                    playButton.title = "Reproducir";
+                }
+
+                function togglePlay() {
+                    if (!frames.length) return;
+                    if (timer !== null) {
+                        stop();
+                        return;
+                    }
+                    playButton.innerHTML = "&#10074;&#10074;";
+                    playButton.title = "Pausar";
+                    timer = window.setInterval(function () {
+                        showFrame(currentFrame + 1);
+                    }, 850);
+                }
+
+                container.querySelector('[data-action="previous"]')
+                    .addEventListener("click", function () {
+                        stop();
+                        showFrame(currentFrame - 1);
+                    });
+                playButton.addEventListener("click", togglePlay);
+                container.querySelector('[data-action="next"]')
+                    .addEventListener("click", function () {
+                        stop();
+                        showFrame(currentFrame + 1);
+                    });
+                slider.addEventListener("input", function () {
+                    stop();
+                    showFrame(Number(slider.value));
+                });
+
+                map.on("overlayadd", function (event) {
+                    if (event.layer === radarGroup) {
+                        radarVisible = true;
+                        container.style.display = "block";
+                        if (frames.length && currentFrame < 0) {
+                            showFrame(frames.length - 1);
+                        }
+                    }
+                });
+                map.on("overlayremove", function (event) {
+                    if (event.layer === radarGroup) {
+                        radarVisible = false;
+                        stop();
+                        container.style.display = "none";
+                    }
+                });
+
+                fetch(apiUrl)
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error("HTTP " + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        const available = data.radar && data.radar.past
+                            ? data.radar.past
+                            : [];
+                        frames = available.map(function (frame) {
+                            return {
+                                time: frame.time,
+                                layer: L.tileLayer(
+                                    data.host + frame.path +
+                                        "/256/{z}/{x}/{y}/2/1_1.png",
+                                    {
+                                        opacity: 0.62,
+                                        maxNativeZoom: 7,
+                                        maxZoom: 19,
+                                        attribution:
+                                            'Radar: <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>'
+                                    }
+                                )
+                            };
+                        });
+                        if (!frames.length) {
+                            throw new Error("Sin imágenes disponibles");
+                        }
+                        slider.max = String(frames.length - 1);
+                        timeLabel.textContent = "Radar preparado";
+                        if (radarVisible) {
+                            showFrame(frames.length - 1);
+                        }
+                    })
+                    .catch(function () {
+                        stop();
+                        timeLabel.textContent =
+                            "Radar no disponible. Comprueba la conexión.";
+                    });
+            })();
+            {% endmacro %}
+            """
+        )
+
+        def __init__(self, radar_group):
+
+            super().__init__()
+            self._name = "ControlRadarLluvia"
+            self.radar_group = radar_group
+
+    ControlRadarLluvia(capa_radar).add_to(mapa)
+
+    return capa_radar
+
+
 def _identificador_sql(nombre):
 
     return '"' + nombre.replace('"', '""') + '"'
@@ -1179,6 +1383,8 @@ def render():
             show=False
         ).add_to(mapa_general)
 
+        _agregar_radar_lluvia(mapa_general, folium)
+
         if features_mapa:
 
             folium.GeoJson(
@@ -1274,6 +1480,11 @@ def render():
             </div>
             """,
             unsafe_allow_html=True
+        )
+        st.caption(
+            "La capa opcional **Radar de lluvia** muestra observaciones de las "
+            "últimas dos horas y requiere conexión a Internet. No es una "
+            "predicción. Datos de [RainViewer](https://www.rainviewer.com/)."
         )
         st_folium(
             mapa_general,
