@@ -1,5 +1,19 @@
 # CuadernoPro - Release notes
 
+## v8.4.8 - Radar de lluvia animado en mapas
+
+- Añade una capa opcional de radar de lluvia sobre el mapa general de la
+  explotación.
+- Permite reproducir, pausar y recorrer las observaciones de las últimas dos
+  horas.
+- Muestra la fecha y hora de cada imagen de radar.
+- Mantiene visibles las parcelas y los cultivos sobre la capa meteorológica.
+- La capa está desactivada al abrir el mapa y se degrada de forma segura cuando
+  no hay conexión o el servicio externo no está disponible.
+- No cambia el modelo de datos de usuario.
+- No requiere migración manual.
+- Los datos existentes se conservan.
+
 ## v8.4.7 - Ubicación SIGPAC desde la explotación
 
 - La pantalla `Nueva parcela` propone la provincia y el municipio configurados

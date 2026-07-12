@@ -1,5 +1,30 @@
 # Checklist release CuadernoPro v8
 
+## Release v8.4.8
+
+- Versión de producto visible: `8.4.8`.
+- Objetivo: añadir radar de lluvia animado al mapa general.
+- Modelo de datos: sin cambios.
+- Migración manual: no necesaria.
+- Documentos reales de usuario: no se versionan.
+
+Cambios previstos:
+
+- [x] Capa de radar opcional y desactivada inicialmente.
+- [x] Reproducción, pausa, navegación temporal y hora de observación.
+- [x] Funcionamiento seguro sin conexión o sin servicio de radar.
+- [x] Atribución visible al proveedor de datos.
+- [x] `core/version.py` actualizado a `8.4.8`.
+- [x] `scripts/probar_release_v8.py` espera `8.4.8`.
+
+Validaciones antes de publicar:
+
+- [x] Compilación Python desde `.venv`.
+- [x] Renderizado de la capa Folium y sus controles.
+- [x] `scripts/probar_release_v8.py`.
+- [x] `git diff --check` y revisión de artefactos.
+- [x] Auditoría de elementos prohibidos seguidos por Git.
+
 ## Release v8.4.7
 
 - Versión de producto visible: `8.4.7`.
