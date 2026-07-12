@@ -16,6 +16,12 @@ evolución reciente de la lluvia sin ocultar las parcelas de la explotación.
 - La capa permanece desactivada inicialmente y el mapa sigue funcionando si el
   servicio de radar no está disponible.
 - Se muestra la atribución obligatoria al proveedor de los datos.
+- Se declara `branca` como dependencia directa porque CuadernoPro importa su
+  motor de plantillas para generar el control del radar.
+- Se regenera `THIRD_PARTY_NOTICES.md` desde el entorno exacto de build y se
+  documentan las condiciones de las fuentes cartográficas y meteorológicas.
+- El paquete Windows incorpora tanto los avisos de terceros como las
+  atribuciones de datos externos.
 
 ### Compatibilidad
 

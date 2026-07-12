@@ -21,6 +21,18 @@ compartan bajo la misma licencia.
 
 Texto de referencia: https://creativecommons.org/licenses/by-sa/4.0/
 
+## Materiales y datos de terceros
+
+La licencia CC BY-SA 4.0 anterior solo cubre la documentación creada para
+CuadernoPro. No cambia ni sustituye las licencias, condiciones de servicio o
+derechos de autor de bibliotecas, mapas, ortofotografías, datos SIGPAC, radar
+meteorológico u otros materiales de terceros.
+
+Las dependencias de software y las fuentes de datos externas se documentan en:
+
+- `THIRD_PARTY_NOTICES.md`;
+- `ATRIBUCIONES_DATOS.md`.
+
 ## Código fuente
 
 El código fuente de CuadernoPro no usa Creative Commons. El código se distribuye

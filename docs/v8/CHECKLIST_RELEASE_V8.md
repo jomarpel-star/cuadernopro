@@ -24,6 +24,10 @@ Validaciones antes de publicar:
 - [x] `scripts/probar_release_v8.py`.
 - [x] `git diff --check` y revisión de artefactos.
 - [x] Auditoría de elementos prohibidos seguidos por Git.
+- [x] Dependencias directas y transitivas inventariadas desde el entorno de
+  build.
+- [x] Licencias de paquetes sin valores desconocidos.
+- [x] Atribuciones de SIGPAC, PNOA/IGN, OpenStreetMap y RainViewer revisadas.
 
 ## Release v8.4.7
 

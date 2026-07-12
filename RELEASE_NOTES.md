@@ -10,6 +10,10 @@
 - Mantiene visibles las parcelas y los cultivos sobre la capa meteorológica.
 - La capa está desactivada al abrir el mapa y se degrada de forma segura cuando
   no hay conexión o el servicio externo no está disponible.
+- Declara `branca` como dependencia directa y actualiza el inventario completo
+  de licencias del entorno usado para construir el instalador.
+- Documenta las atribuciones y condiciones de SIGPAC, PNOA/IGN,
+  OpenStreetMap y RainViewer.
 - No cambia el modelo de datos de usuario.
 - No requiere migración manual.
 - Los datos existentes se conservan.

@@ -1373,7 +1373,7 @@ def render():
             overlay=False,
             control=True,
             show=True,
-            attr="IGN / PNOA"
+            attr="PNOA © IGN/SCNE, CC BY 4.0"
         ).add_to(mapa_general)
         folium.TileLayer(
             "OpenStreetMap",

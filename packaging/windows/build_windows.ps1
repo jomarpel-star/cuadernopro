@@ -232,7 +232,8 @@ $Docs = @(
     "USO_BASICO.md",
     "GUIA_INSTALACION_SENCILLA.md",
     "AVISO_RESPONSABILIDAD.md",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "ATRIBUCIONES_DATOS.md"
 )
 
 foreach ($Doc in $Docs) {

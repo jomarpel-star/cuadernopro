@@ -111,6 +111,7 @@ for nombre in (
     "GUIA_INSTALACION_SENCILLA.md",
     "AVISO_RESPONSABILIDAD.md",
     "THIRD_PARTY_NOTICES.md",
+    "ATRIBUCIONES_DATOS.md",
 ):
     ruta = REPO_ROOT / nombre
 
