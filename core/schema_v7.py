@@ -531,6 +531,14 @@ TABLE_DEFINITIONS = (
         ON DELETE CASCADE
     )
     """,
+    """
+    CREATE TABLE IF NOT EXISTS mapa_colores_cultivos(
+        clave TEXT PRIMARY KEY,
+        nombre TEXT NOT NULL,
+        color TEXT NOT NULL,
+        updated_at TEXT
+    )
+    """,
 )
 
 
@@ -681,6 +689,9 @@ EXPECTED_COLUMNS = {
         "id", "movimiento_id", "tipo_documento", "nombre_original",
         "nombre_guardado", "ruta_relativa", "extension", "mime_type",
         "size_bytes", "sha256", "orden", "created_at", "updated_at",
+    ),
+    "mapa_colores_cultivos": (
+        "clave", "nombre", "color", "updated_at",
     ),
 }
 
@@ -1015,6 +1026,16 @@ def asegurar_ampliaciones_v8_0_1(conn):
             FOREIGN KEY(cultivo_id) REFERENCES cultivos(id),
             FOREIGN KEY(parcela_id) REFERENCES parcelas(id),
             UNIQUE(practica_id, cultivo_id, parcela_id)
+        )
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS mapa_colores_cultivos(
+            clave TEXT PRIMARY KEY,
+            nombre TEXT NOT NULL,
+            color TEXT NOT NULL,
+            updated_at TEXT
         )
         """
     )

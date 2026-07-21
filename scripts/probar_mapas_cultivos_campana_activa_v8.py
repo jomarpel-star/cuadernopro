@@ -19,8 +19,11 @@ from core.campanas import activar_campana, desactivar_campanas  # noqa: E402
 from core.db import crear_tablas  # noqa: E402
 from modules.mapas import (  # noqa: E402
     _formatear_arboles_tooltip,
+    _guardar_colores_cultivos_mapa,
+    _leer_colores_cultivos_mapa,
     _leer_cultivos_mapa,
     construir_tooltip_parcela_mapa,
+    obtener_color_cultivo,
 )
 
 
@@ -250,10 +253,79 @@ def _assert_formateo_arboles():
             )
 
 
+def _assert_colores_cultivos():
+
+    with sqlite3.connect(DB_PRUEBA) as conn:
+
+        tabla = conn.execute(
+            """
+            SELECT name FROM sqlite_master
+            WHERE type='table' AND name='mapa_colores_cultivos'
+            """
+        ).fetchone()
+
+    if not tabla:
+
+        raise AssertionError("No se creo la tabla de colores del mapa")
+
+    casos_fijos = {
+        "ALMENDRO": ("green", "darkgreen"),
+        "OLIVAR": ("blue", "darkblue"),
+        "TIERRAS ARABLES": ("white", "black"),
+        "CEREAL DE INVIERNO": ("white", "black"),
+    }
+
+    for cultivo, esperado in casos_fijos.items():
+
+        estilo = obtener_color_cultivo([cultivo], {})
+        obtenido = (estilo["fillColor"], estilo["color"])
+
+        if obtenido != esperado:
+
+            raise AssertionError(
+                f"Color fijo inesperado para {cultivo}: {obtenido!r}"
+            )
+
+    guardados = _guardar_colores_cultivos_mapa(
+        {
+            "VIÑEDO": "#A855F7",
+            "ALMENDRO": "#FFFFFF",
+            "INVALIDO": "rojo",
+        }
+    )
+
+    if guardados != 1:
+
+        raise AssertionError(
+            f"Solo debia guardarse el color configurable: {guardados}"
+        )
+
+    colores = _leer_colores_cultivos_mapa()
+
+    if colores != {"vinedo": "#A855F7"}:
+
+        raise AssertionError(f"Colores persistidos inesperados: {colores!r}")
+
+    estilo_vinedo = obtener_color_cultivo(["VIÑEDO"], colores)
+
+    if estilo_vinedo["fillColor"] != "#A855F7":
+
+        raise AssertionError(f"No se aplica el color guardado: {estilo_vinedo!r}")
+
+    estilo_mixto = obtener_color_cultivo(["VIÑEDO", "OLIVAR"], colores)
+
+    if estilo_mixto["fillColor"] != "blue":
+
+        raise AssertionError(
+            f"El color fijo debe prevalecer en parcela mixta: {estilo_mixto!r}"
+        )
+
+
 def main():
 
     _limpiar_db()
     _assert_formateo_arboles()
+    _assert_colores_cultivos()
     ctx = _insertar_datos()
 
     cultivos = _cultivos_parcela()
@@ -311,7 +383,7 @@ def main():
 
         raise AssertionError(f"Tooltip sin campana inesperado: {tooltip!r}")
 
-    print("Mapas cultivos campana activa v8.4.6: OK")
+    print("Mapas cultivos y colores configurables: OK")
     print(f"Base: {DB_PRUEBA}")
     return 0
 

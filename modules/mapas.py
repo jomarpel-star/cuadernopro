@@ -1,5 +1,7 @@
 from datetime import datetime
 from html import escape
+import re
+import unicodedata
 
 import pandas as pd
 import streamlit as st
@@ -12,6 +14,27 @@ from services.sigpac import (
     calcular_bounds_geojson,
     faltan_codigos_sigpac_numericos as _faltan_codigos_sigpac_numericos,
     normalizar_geojson_sigpac,
+)
+
+
+PALETA_COLORES_CULTIVOS = (
+    "#F97316",
+    "#A855F7",
+    "#DC2626",
+    "#EAB308",
+    "#0D9488",
+    "#DB2777",
+    "#92400E",
+    "#0891B2",
+    "#4F46E5",
+    "#65A30D",
+)
+
+TERMINOS_TIERRA_ARABLE = (
+    "arable",
+    "herbace",
+    "cereal",
+    "barbecho",
 )
 
 
@@ -520,6 +543,325 @@ def _clave_texto_mapa(valor):
     return _texto_mapa(valor).casefold()
 
 
+def _normalizar_clave_color_cultivo(valor):
+
+    texto = unicodedata.normalize("NFKD", _texto_mapa(valor).casefold())
+    texto = "".join(
+        caracter
+        for caracter in texto
+        if not unicodedata.combining(caracter)
+    )
+    return " ".join(re.findall(r"[a-z0-9]+", texto))
+
+
+def _tipo_color_fijo_cultivo(valor):
+
+    clave = _normalizar_clave_color_cultivo(valor)
+
+    if "almend" in clave:
+
+        return "almendro"
+
+    if "oliv" in clave:
+
+        return "olivar"
+
+    if any(termino in clave for termino in TERMINOS_TIERRA_ARABLE):
+
+        return "tierra_arable"
+
+    return None
+
+
+def _es_color_hexadecimal(valor):
+
+    return bool(re.fullmatch(r"#[0-9a-fA-F]{6}", str(valor or "")))
+
+
+def _oscurecer_color(color, factor=0.62):
+
+    if not _es_color_hexadecimal(color):
+
+        return "#4B5563"
+
+    componentes = [
+        int(color[indice:indice + 2], 16)
+        for indice in (1, 3, 5)
+    ]
+    return "#" + "".join(
+        f"{max(0, min(255, round(componente * factor))):02X}"
+        for componente in componentes
+    )
+
+
+def _estilo_color_cultivo(color_relleno):
+
+    return {
+        "fillColor": color_relleno.upper(),
+        "color": _oscurecer_color(color_relleno),
+        "fillOpacity": 0.48,
+        "weight": 2,
+    }
+
+
+def obtener_color_cultivo(especies, colores_personalizados=None):
+
+    if isinstance(especies, str):
+
+        especies = [especies]
+
+    especies = list(especies or [])
+    colores_personalizados = colores_personalizados or {}
+
+    for tipo in ("almendro", "olivar", "tierra_arable"):
+
+        if not any(_tipo_color_fijo_cultivo(especie) == tipo for especie in especies):
+
+            continue
+
+        if tipo == "almendro":
+
+            return {
+                "fillColor": "green",
+                "color": "darkgreen",
+                "fillOpacity": 0.45,
+                "weight": 2,
+            }
+
+        if tipo == "olivar":
+
+            return {
+                "fillColor": "blue",
+                "color": "darkblue",
+                "fillOpacity": 0.45,
+                "weight": 2,
+            }
+
+        return {
+            "fillColor": "white",
+            "color": "black",
+            "fillOpacity": 0.55,
+            "weight": 2,
+        }
+
+    for especie in especies:
+
+        clave = _normalizar_clave_color_cultivo(especie)
+        color = colores_personalizados.get(clave)
+
+        if _es_color_hexadecimal(color):
+
+            return _estilo_color_cultivo(color)
+
+    return {
+        "fillColor": "lightgray",
+        "color": "gray",
+        "fillOpacity": 0.35,
+        "weight": 1,
+    }
+
+
+def _colores_iniciales_cultivos(especies):
+
+    nombres_por_clave = {}
+
+    for especie in especies:
+
+        nombre = _texto_mapa(especie).upper()
+        clave = _normalizar_clave_color_cultivo(nombre)
+
+        if not clave or _tipo_color_fijo_cultivo(nombre):
+
+            continue
+
+        nombres_por_clave.setdefault(clave, nombre)
+
+    return {
+        clave: PALETA_COLORES_CULTIVOS[indice % len(PALETA_COLORES_CULTIVOS)]
+        for indice, clave in enumerate(sorted(nombres_por_clave))
+    }
+
+
+def _leer_colores_cultivos_mapa():
+
+    with conectar() as conn:
+
+        if not _tabla_existe_conn(conn, "mapa_colores_cultivos"):
+
+            return {}
+
+        filas = conn.execute(
+            "SELECT clave,color FROM mapa_colores_cultivos ORDER BY clave"
+        ).fetchall()
+
+    return {
+        str(clave): str(color).upper()
+        for clave, color in filas
+        if clave and _es_color_hexadecimal(color)
+    }
+
+
+def _guardar_colores_cultivos_mapa(colores_por_nombre):
+
+    ahora = datetime.now().isoformat(timespec="seconds")
+    filas = []
+
+    for nombre, color in colores_por_nombre.items():
+
+        clave = _normalizar_clave_color_cultivo(nombre)
+
+        if (
+            not clave
+            or _tipo_color_fijo_cultivo(nombre)
+            or not _es_color_hexadecimal(color)
+        ):
+
+            continue
+
+        filas.append((clave, _texto_mapa(nombre).upper(), color.upper(), ahora))
+
+    if not filas:
+
+        return 0
+
+    with conectar() as conn:
+
+        conn.executemany(
+            """
+            INSERT INTO mapa_colores_cultivos(clave,nombre,color,updated_at)
+            VALUES (?,?,?,?)
+            ON CONFLICT(clave) DO UPDATE SET
+                nombre=excluded.nombre,
+                color=excluded.color,
+                updated_at=excluded.updated_at
+            """,
+            filas,
+        )
+        conn.commit()
+
+    return len(filas)
+
+
+def _editor_colores_cultivos_mapa(especies, colores_guardados):
+
+    nombres_por_clave = {}
+
+    for especie in especies:
+
+        nombre = _texto_mapa(especie).upper()
+        clave = _normalizar_clave_color_cultivo(nombre)
+
+        if clave and not _tipo_color_fijo_cultivo(nombre):
+
+            nombres_por_clave.setdefault(clave, nombre)
+
+    colores = {
+        **_colores_iniciales_cultivos(nombres_por_clave.values()),
+        **colores_guardados,
+    }
+
+    with st.expander("Configurar colores de los cultivos"):
+
+        if not nombres_por_clave:
+
+            st.info("No hay otros cultivos que necesiten un color configurable.")
+            return colores
+
+        selecciones = {}
+
+        with st.form("form_colores_cultivos_mapa"):
+
+            columnas = st.columns(min(3, len(nombres_por_clave)))
+
+            for indice, clave in enumerate(sorted(nombres_por_clave)):
+
+                nombre = nombres_por_clave[clave]
+
+                with columnas[indice % len(columnas)]:
+
+                    selecciones[nombre] = st.color_picker(
+                        nombre.title(),
+                        value=colores[clave],
+                        key=(
+                            "color_mapa_cultivo_"
+                            + clave.replace(" ", "_")
+                        ),
+                    )
+
+            guardar = st.form_submit_button(
+                "Guardar colores",
+                type="primary",
+                width="stretch",
+            )
+
+        if guardar:
+
+            _guardar_colores_cultivos_mapa(selecciones)
+
+            for nombre, color in selecciones.items():
+
+                colores[_normalizar_clave_color_cultivo(nombre)] = color.upper()
+
+            st.success("Colores guardados. El mapa ya usa la nueva paleta.")
+
+    return colores
+
+
+def _html_leyenda_color(color_relleno, color_borde, etiqueta):
+
+    return (
+        '<span style="display:inline-block;width:14px;height:14px;'
+        f'background:{escape(color_relleno)};border:1px solid '
+        f'{escape(color_borde)};"></span> {escape(etiqueta)}'
+    )
+
+
+def _leyenda_colores_cultivos(especies, colores_personalizados):
+
+    elementos = [
+        _html_leyenda_color("green", "darkgreen", "Verde: Almendro"),
+        _html_leyenda_color("blue", "darkblue", "Azul: Olivar"),
+        _html_leyenda_color("white", "black", "Blanco: Tierra arable"),
+    ]
+    nombres_por_clave = {}
+
+    for especie in especies:
+
+        nombre = _texto_mapa(especie).upper()
+        clave = _normalizar_clave_color_cultivo(nombre)
+
+        if clave and not _tipo_color_fijo_cultivo(nombre):
+
+            nombres_por_clave.setdefault(clave, nombre)
+
+    for clave in sorted(nombres_por_clave):
+
+        color = colores_personalizados.get(clave)
+
+        if not _es_color_hexadecimal(color):
+
+            continue
+
+        elementos.append(
+            _html_leyenda_color(
+                color,
+                _oscurecer_color(color),
+                nombres_por_clave[clave].title(),
+            )
+        )
+
+    elementos.append(
+        _html_leyenda_color("lightgray", "gray", "Gris: Sin cultivo")
+    )
+    return (
+        '<div style="display:flex;flex-wrap:wrap;gap:8px 18px;'
+        'align-items:center;margin:0.5rem 0 0.75rem 0;">'
+        "<strong>Colores por cultivo</strong>"
+        + "".join(f"<span>{elemento}</span>" for elemento in elementos)
+        + "</div>"
+    )
+
+
 def _obtener_campana_contexto_mapa(conn, campana_id=None):
 
     if campana_id is not None:
@@ -825,54 +1167,6 @@ def render():
         import folium
         from streamlit_folium import st_folium
         import json
-
-
-        def obtener_color_cultivo(cultivos_texto):
-
-            texto = str(cultivos_texto or "").casefold()
-
-            if "almend" in texto:
-
-                return {
-                    "fillColor": "green",
-                    "color": "darkgreen",
-                    "fillOpacity": 0.45,
-                    "weight": 2
-                }
-
-            if "oliv" in texto:
-
-                return {
-                    "fillColor": "blue",
-                    "color": "darkblue",
-                    "fillOpacity": 0.45,
-                    "weight": 2
-                }
-
-            if any(
-                termino in texto
-                for termino in [
-                    "arable",
-                    "herbace",
-                    "herbáce",
-                    "cereal",
-                    "barbecho"
-                ]
-            ):
-
-                return {
-                    "fillColor": "white",
-                    "color": "black",
-                    "fillOpacity": 0.55,
-                    "weight": 2
-                }
-
-            return {
-                "fillColor": "lightgray",
-                "color": "gray",
-                "fillOpacity": 0.35,
-                "weight": 1
-            }
 
 
         def crear_mapa_parcela(geojson, etiqueta):
@@ -1197,6 +1491,15 @@ def render():
             )
 
         cultivos_mapa = _leer_cultivos_mapa(campana_contexto_id)
+        especies_mapa = [
+            _texto_mapa(especie).upper()
+            for especie in cultivos_mapa["especie"].tolist()
+            if _texto_mapa(especie)
+        ]
+        colores_cultivos = _editor_colores_cultivos_mapa(
+            especies_mapa,
+            _leer_colores_cultivos_mapa(),
+        )
         cultivos_por_parcela = {}
 
         for _, cultivo in cultivos_mapa.iterrows():
@@ -1306,7 +1609,10 @@ def render():
                 or not str(parcela["nombre"]).strip()
                 else str(parcela["nombre"]).strip()
             )
-            estilo_cultivo = obtener_color_cultivo(cultivos_texto)
+            estilo_cultivo = obtener_color_cultivo(
+                [cultivo["especie"] for cultivo in cultivos],
+                colores_cultivos,
+            )
             tooltip_html = construir_tooltip_parcela_mapa(
                 {
                     **parcela.to_dict(),
@@ -1462,24 +1768,8 @@ def render():
 
         folium.LayerControl(collapsed=False).add_to(mapa_general)
         st.markdown(
-            """
-            <div style="margin: 0.5rem 0 0.75rem 0;">
-              <strong>Colores por cultivo</strong>&nbsp;&nbsp;
-              <span style="display:inline-block;width:14px;height:14px;
-                    background:green;border:1px solid darkgreen;"></span>
-              Verde: Almendro&nbsp;&nbsp;
-              <span style="display:inline-block;width:14px;height:14px;
-                    background:blue;border:1px solid darkblue;"></span>
-              Azul: Olivar&nbsp;&nbsp;
-              <span style="display:inline-block;width:14px;height:14px;
-                    background:white;border:1px solid black;"></span>
-              Blanco: Tierra arable&nbsp;&nbsp;
-              <span style="display:inline-block;width:14px;height:14px;
-                    background:lightgray;border:1px solid gray;"></span>
-              Gris: Sin cultivo / otro
-            </div>
-            """,
-            unsafe_allow_html=True
+            _leyenda_colores_cultivos(especies_mapa, colores_cultivos),
+            unsafe_allow_html=True,
         )
         st.caption(
             "La capa opcional **Radar de lluvia** muestra observaciones de las "
