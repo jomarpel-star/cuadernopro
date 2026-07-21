@@ -1,5 +1,21 @@
 # CuadernoPro - Release notes
 
+## v8.4.10 - Personalización de colores de cultivos
+
+- Mantiene los colores existentes de almendro (verde), olivar (azul) y
+  tierras arables (blanco).
+- Añade en Mapas un selector visual para personalizar el color de los demás
+  cultivos de la campaña activa.
+- Propone una paleta inicial diferenciada para que el mapa sea legible antes
+  de realizar ajustes manuales.
+- Guarda las preferencias de color en la base SQLite local y las reutiliza en
+  las campañas posteriores.
+- Actualiza la leyenda del mapa con los cultivos y colores configurados.
+- En parcelas con varios cultivos, conserva la prioridad de los colores fijos.
+- Añade una tabla auxiliar idempotente para preferencias visuales; no modifica
+  los registros agronómicos existentes.
+- No requiere migración manual y conserva los datos del usuario.
+
 ## v8.4.9 - Radar y avisos legales completos
 
 - Mantiene la capa opcional de radar de lluvia animado sobre el mapa general.
@@ -45,22 +61,22 @@
 - No requiere migración manual.
 - Los datos existentes se conservan.
 
-## v8.4.6 - Release publica recomendada
+## v8.4.6 - Release pública recomendada
 
 - Corrige duplicados de parcelas en el cuaderno oficial.
-- La seccion de identificacion de parcelas lista cada recinto una sola vez.
+- La sección de identificación de parcelas lista cada recinto una sola vez.
 - Corrige el campo Sistema en la tabla de parcelas del cuaderno oficial.
-- Mejora la activacion y desactivacion de campanas activas con confirmacion
-  explicita.
-- Evita usar una campana como activa de forma silenciosa cuando no hay ninguna
+- Mejora la activación y desactivación de campañas activas con confirmación
+  explícita.
+- Evita usar una campaña como activa de forma silenciosa cuando no hay ninguna
   activada.
 - Mejora los mapas:
-  - tooltip mas compacto;
-  - cultivos filtrados por campana activa;
-  - numero de arboles formateado correctamente.
+  - tooltip más compacto;
+  - cultivos filtrados por campaña activa;
+  - número de árboles formateado correctamente.
 - El instalador recomendado pasa a ser `CuadernoPro-8.4.6-Setup.exe`.
 - No cambia el modelo de datos de usuario.
-- No requiere migracion manual.
+- No requiere migración manual.
 - Los datos existentes se conservan.
 
 ## v8.4.2 - Web pública estática para Plesk

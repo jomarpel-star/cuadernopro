@@ -118,7 +118,7 @@ docker compose up -d --no-build
 docker compose ps
 ```
 
-Para fijar una release concreta, configurar `CUADERNOPRO_IMAGE_TAG=8.4.9` en
+Para fijar una release concreta, configurar `CUADERNOPRO_IMAGE_TAG=8.4.10` en
 el archivo `.env`. Para construir desde el código fuente en lugar de descargar
 la imagen oficial, usar `docker compose up -d --build`.
 

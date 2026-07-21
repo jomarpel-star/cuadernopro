@@ -5,8 +5,11 @@
 Descarga el instalador desde la release pública:
 
 ```text
-CuadernoPro-8.4.9-Setup.exe
+CuadernoPro-8.4.10-Setup.exe
 ```
+
+La versión 8.4.10 permite personalizar en Mapas los colores de los cultivos y
+conserva las preferencias para las campañas siguientes.
 
 También se pública:
 
@@ -22,7 +25,7 @@ el archivo descargado coincide con el publicado.
 En Windows PowerShell:
 
 ```powershell
-certutil -hashfile CuadernoPro-8.4.9-Setup.exe SHA256
+certutil -hashfile CuadernoPro-8.4.10-Setup.exe SHA256
 ```
 
 Compara el resultado con el archivo `SHA256SUMS.txt` publicado en la release de
@@ -41,7 +44,7 @@ suficiente.
 Para instalar con seguridad:
 
 1. Descarga CuadernoPro solo desde esta página oficial o desde GitHub Releases.
-2. Comprueba que el archivo se llama `CuadernoPro-8.4.9-Setup.exe`.
+2. Comprueba que el archivo se llama `CuadernoPro-8.4.10-Setup.exe`.
 3. Verifica el SHA256 publicado en la release.
 4. Si confías en el origen, en el aviso de Windows pulsa `Más información` y
    después `Ejecutar de todas formas`.
@@ -50,7 +53,7 @@ Estamos estudiando la firma digital del instalador para futuras versiones.
 
 ## Instalar
 
-1. Ejecuta `CuadernoPro-8.4.9-Setup.exe`.
+1. Ejecuta `CuadernoPro-8.4.10-Setup.exe`.
 2. Sigue el asistente.
 3. Abre CuadernoPro desde el acceso directo.
 

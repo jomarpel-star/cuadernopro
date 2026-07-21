@@ -1,5 +1,32 @@
 # Changelog CuadernoPro v8
 
+## v8.4.10 - Personalización de colores de cultivos
+
+### Resumen
+
+El mapa general permite adaptar visualmente los cultivos de cada explotación
+sin perder los colores ya conocidos de almendro, olivar y tierras arables.
+
+### Cambios
+
+- Se mantienen fijos almendro en verde, olivar en azul y tierras arables en
+  blanco.
+- Se incorpora un selector de color para los demás cultivos presentes en la
+  campaña activa.
+- Se ofrece una paleta inicial diferenciada y una leyenda dinámica.
+- Las elecciones se guardan en SQLite y se reutilizan entre campañas.
+- Las parcelas con varios cultivos mantienen la prioridad de los colores
+  fijos.
+- Se amplían las pruebas de mapas para comprobar colores fijos,
+  personalización, persistencia y parcelas mixtas.
+
+### Compatibilidad
+
+- Se crea de forma idempotente la tabla auxiliar `mapa_colores_cultivos`.
+- No se modifican los registros agronómicos existentes.
+- No requiere migración manual.
+- Los datos existentes se conservan.
+
 ## v8.4.9 - Radar y avisos legales completos
 
 ### Resumen
@@ -77,32 +104,32 @@ el municipio guardados en la explotación para localizar los códigos SIGPAC.
 - No requiere migración manual.
 - Los datos existentes se conservan.
 
-## v8.4.6 - Release publica recomendada
+## v8.4.6 - Release pública recomendada
 
 ### Resumen
 
-Se prepara la release publica recomendada para Windows con correcciones en el
-cuaderno oficial, gestion mas segura de campanas activas y mapas mas claros. No
-cambia el modelo de datos de usuario y no requiere migracion manual.
+Se prepara la release pública recomendada para Windows con correcciones en el
+cuaderno oficial, gestión más segura de campañas activas y mapas más claros. No
+cambia el modelo de datos de usuario y no requiere migración manual.
 
 ### Cambios
 
 - Se corrigen duplicados de parcelas en el cuaderno oficial.
-- La seccion de identificacion de parcelas lista cada recinto una sola vez.
+- La sección de identificación de parcelas lista cada recinto una sola vez.
 - Se corrige el campo Sistema en la tabla de parcelas del cuaderno oficial.
-- Se mejora la activacion y desactivacion de campanas activas con confirmacion
-  explicita.
-- Se evita usar una campana como activa de forma silenciosa cuando no hay
+- Se mejora la activación y desactivación de campañas activas con confirmación
+  explícita.
+- Se evita usar una campaña como activa de forma silenciosa cuando no hay
   ninguna activada.
-- En mapas, el tooltip de parcelas es mas compacto.
-- En mapas, los cultivos del tooltip se filtran por campana activa.
-- En mapas, el numero de arboles se formatea correctamente.
+- En mapas, el tooltip de parcelas es más compacto.
+- En mapas, los cultivos del tooltip se filtran por campaña activa.
+- En mapas, el número de árboles se formatea correctamente.
 - El instalador recomendado pasa a ser `CuadernoPro-8.4.6-Setup.exe`.
 
 ### Compatibilidad
 
 - No cambia el modelo de datos de usuario.
-- No requiere migracion manual.
+- No requiere migración manual.
 - Los datos existentes se conservan.
 
 ## v8.4.2 - Web pública estática para Plesk

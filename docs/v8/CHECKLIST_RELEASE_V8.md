@@ -1,5 +1,36 @@
 # Checklist release CuadernoPro v8
 
+## Release v8.4.10
+
+- Versión de producto visible: `8.4.10`.
+- Objetivo: permitir personalizar los colores de los cultivos en Mapas.
+- Modelo de datos: nueva tabla auxiliar idempotente para preferencias
+  visuales; sin cambios en los registros agronómicos.
+- Migración manual: no necesaria.
+- Documentos reales de usuario: no se versionan.
+
+Cambios previstos:
+
+- [x] Almendro verde, olivar azul y tierras arables blancas sin cambios.
+- [x] Selector visual para los demás cultivos.
+- [x] Paleta inicial y leyenda dinámica.
+- [x] Preferencias persistentes entre campañas.
+- [x] `core/version.py` actualizado a `8.4.10`.
+- [x] `scripts/probar_release_v8.py` espera `8.4.10`.
+- [x] Web pública alineada con el instalador v8.4.10.
+
+Validaciones antes de publicar:
+
+- [x] Compilación Python desde `.venv`.
+- [x] Prueba específica de colores y persistencia en mapas.
+- [x] Auditoría de documentación pública sin advertencias.
+- [x] `scripts/probar_release_v8.py`.
+- [ ] Comprobación de etiqueta `v8.4.10` en `HEAD`.
+- [ ] Build portable e instalador desde la etiqueta `v8.4.10`.
+- [ ] Instalación, HTTP, desinstalación y conservación de datos.
+- [ ] ZIP de código y ZIP Plesk sin elementos prohibidos.
+- [ ] SHA256 del instalador verificado.
+
 ## Release v8.4.9
 
 - Versión de producto visible: `8.4.9`.

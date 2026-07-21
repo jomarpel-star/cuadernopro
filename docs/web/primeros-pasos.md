@@ -2,7 +2,7 @@
 
 ## 1. Instalar
 
-Descarga e instala `CuadernoPro-8.4.9-Setup.exe` desde la release pública.
+Descarga e instala `CuadernoPro-8.4.10-Setup.exe` desde la release pública.
 
 ## 2. Abrir
 

@@ -29,7 +29,7 @@ Docker puede escribir en ella.
 
 ## Arranque
 
-La imagen oficial se publica en Docker Hub para Linux `amd64` y `arm64`:
+La imagen oficial está disponible en Docker Hub para Linux `amd64` y `arm64`:
 
 ```text
 jomarpel74/cuadernopro
@@ -42,14 +42,14 @@ docker compose pull cuadernopro
 docker compose up -d --no-build
 ```
 
-Para fijar una version concreta y evitar actualizaciones accidentales, crear
+Para fijar una versión concreta y evitar actualizaciones accidentales, crear
 un archivo `.env` a partir de `.env.example` y configurar, por ejemplo:
 
 ```dotenv
-CUADERNOPRO_IMAGE_TAG=8.4.9
+CUADERNOPRO_IMAGE_TAG=8.4.10
 ```
 
-Si se quiere construir la imagen localmente desde el codigo fuente, ejecutar:
+Si se quiere construir la imagen localmente desde el código fuente, ejecutar:
 
 ```bash
 docker compose up -d --build
