@@ -123,6 +123,12 @@ En instalaciones Docker o de desarrollo, la carpeta importante es:
 runtime/
 ```
 
+En Portainer debe usarse el volumen nombrado `cuadernopro_data`, montado en
+`/app/runtime`. Un contenedor cuya inspección muestre `Mounts: []` no conserva
+los datos al ser reemplazado. Consulta [INSTALAR_DOCKER.md](INSTALAR_DOCKER.md)
+y usa `docker-compose.portainer.yml` para actualizaciones seguras con
+Watchtower.
+
 En Windows instalado, la carpeta de datos está en:
 
 ```text

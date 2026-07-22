@@ -1,7 +1,9 @@
 # Instalación con Docker
 
-Esta guía explica como levantar CuadernoPro con Docker. Los datos de la
-aplicación quedan guardados en la carpeta `runtime/` del proyecto.
+Esta guía explica cómo levantar CuadernoPro con Docker sin guardar datos en la
+capa temporal del contenedor. La instalación tradicional conserva los datos en
+la carpeta `runtime/` del proyecto. Portainer utiliza un volumen Docker
+nombrado.
 
 Para CuadernoPro v8.0.0, la documentación principal de release está en
 `docs/v8/README_V8.md`.
@@ -17,14 +19,14 @@ El despliegue usa estos elementos:
 
 - `docker-compose.yml`: define el servicio `cuadernopro`.
 - `runtime/`: carpeta persistente de datos.
-- `runtime/cuadernopro.db`: baseaplicaciónSQLite de la aplicación.
+- `runtime/cuadernopro.db`: base SQLite de la aplicación.
 - `runtime/backups`: copias de seguridad.
-- `runtime/exports`: exportaciones gaplicaciónor la aplicación.
+- `runtime/exports`: exportaciones generadas por la aplicación.
 - `runtime/documentos`: documentos y ficheros asociados.
 
 Si `runtime/` o alguna de sus subcarpetas no existe, la aplicación puede crear
 las carpetas necesarias al arrancar. Aun así, antes de una instalación de
-produccion conviene revisar que la ruta existe y que el usuario que ejecuta
+producción conviene revisar que la ruta existe y que el usuario que ejecuta
 Docker puede escribir en ella.
 
 ## Arranque
@@ -92,10 +94,56 @@ configurado en `CUADERNOPRO_PORT`). Para acceso exterior, la entrada pública
 debe ser el proxy. En ese caso, configura `CUADERNOPRO_BIND_ADDRESS=127.0.0.1`
 en `.env` o usa `./start_proxy.sh`, que lo comprueba antes de arrancar Caddy.
 
+## Portainer y actualizaciones con Watchtower
+
+No crees CuadernoPro únicamente desde la imagen sin configurar almacenamiento.
+La base SQLite, los backups, las exportaciones y los documentos deben compartir
+el mismo montaje persistente en `/app/runtime`.
+
+El archivo recomendado para Portainer es:
+
+```text
+docker-compose.portainer.yml
+```
+
+En `Stacks > Add stack`, pega su contenido en el editor y despliega el stack.
+La configuración crea o reutiliza el volumen estable:
+
+```text
+cuadernopro_data
+```
+
+Antes de restaurar datos, comprueba en la inspección del contenedor que
+`Mounts` contiene una entrada con estos valores:
+
+```text
+Type: volume
+Name/Source: cuadernopro_data
+Destination: /app/runtime
+```
+
+Watchtower recrea el contenedor con sus mismas opciones. Al estar los datos en
+un volumen nombrado, la sustitución de la imagen no sustituye la base. No
+selecciones el volumen `cuadernopro_data` al borrar manualmente el stack y no
+ejecutes operaciones de limpieza que eliminen volúmenes sin uso.
+
+Si se crea el contenedor mediante la interfaz `Containers` en vez de usar un
+stack, hay que configurar manualmente:
+
+- volumen `cuadernopro_data` montado en `/app/runtime`;
+- `CUADERNOPRO_DATA_DIR=/app/runtime`;
+- `CUADERNOPRO_DB_PATH=/app/runtime/cuadernopro.db`;
+- `CUADERNOPRO_BACKUPS_DIR=/app/runtime/backups`;
+- `CUADERNOPRO_EXPORTS_DIR=/app/runtime/exports`;
+- `CUADERNOPRO_DOCUMENTOS_DIR=/app/runtime/documentos`.
+
+Después de crear el contenedor, `Mounts: []` es siempre una configuración
+incorrecta para una instalación con datos reales.
+
 ## Varias instalaciones en el mismo servidor
 
 CuadernoPro no usa un `container_name` fijo en `docker-compose.yml`. Docker
-Compose generara el nombre real del contenedor a partir del nombre del proyecto,
+Compose generará el nombre real del contenedor a partir del nombre del proyecto,
 lo que permite tener varias instalaciones en el mismo servidor.
 
 Para una instalación normal, puede usarse la configuración por defecto:
@@ -118,7 +166,7 @@ COMPOSE_PROJECT_NAME=cuadernopro_demo
 CUADERNOPRO_PORT=8504
 ```
 
-No debe usarse un `container_name` fijo, porque impediria arrancar dos
+No debe usarse un `container_name` fijo, porque impediría arrancar dos
 instalaciones de CuadernoPro en el mismo servidor.
 
 ## URL por defecto
@@ -142,9 +190,10 @@ a Internet. Para acceso exterior, usa el proxy descrito en
 
 ## Persistencia de datos
 
-El contenedor monta la carpeta local `runtime/` dentaplicaciónplicacion. Por
-eso, la base de datos, backups, exportaciones y documentos deben conservarse
-fuera del contenedor.
+El Compose tradicional monta la carpeta local `runtime/` dentro de la
+aplicación. El Compose de Portainer monta el volumen `cuadernopro_data`. En
+ambos casos la base, los backups, las exportaciones y los documentos quedan
+fuera de la capa temporal del contenedor.
 
 No borres `runtime/` si quieres conservar los datos.
 
@@ -170,7 +219,7 @@ Después de crear la copia, comprueba que contiene al menos:
 - `runtime/exports`
 - `runtime/documentos`
 
-Cuando el backup este verificado, ya se puede actualizar el código y volver a
+Cuando el backup esté verificado, ya se puede actualizar el código y volver a
 levantar el servicio con:
 
 ```bash

@@ -186,6 +186,17 @@ Contiene:
 
 No borrar `runtime/` si se quieren conservar los datos.
 
+### Portainer y Watchtower
+
+Para Portainer debe desplegarse `docker-compose.portainer.yml`. Este archivo
+monta el volumen nombrado `cuadernopro_data` en `/app/runtime`; así Watchtower
+puede reemplazar la imagen sin reemplazar la base SQLite ni los documentos.
+
+La inspección del contenedor debe mostrar un montaje con destino
+`/app/runtime`. Si muestra `Mounts: []`, los datos siguen dentro de la capa
+temporal del contenedor y se perderán al recrearlo. La guía completa está en
+[INSTALAR_DOCKER.md](../../INSTALAR_DOCKER.md).
+
 ## Copias de seguridad
 
 Antes de actualizar:

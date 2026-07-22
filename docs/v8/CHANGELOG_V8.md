@@ -1,5 +1,20 @@
 # Changelog CuadernoPro v8
 
+## Próxima versión - Persistencia Docker con Portainer y Watchtower
+
+### Cambios
+
+- La imagen dirige por defecto la base SQLite, los backups, las exportaciones
+  y los documentos a `/app/runtime`.
+- El Dockerfile declara `/app/runtime` como punto de volumen.
+- Se añade un Compose específico para Portainer con el volumen nombrado
+  `cuadernopro_data`.
+- El Compose tradicional conserva `./runtime:/app/runtime` para no ocultar los
+  datos de instalaciones existentes.
+- La publicación de Docker Hub queda bloqueada si falta alguna protección de
+  persistencia.
+- Se documenta la configuración segura para actualizaciones con Watchtower.
+
 ## v8.4.10 - Personalización de colores de cultivos
 
 ### Resumen

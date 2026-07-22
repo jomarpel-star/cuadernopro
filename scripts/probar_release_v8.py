@@ -14,6 +14,10 @@ VERSION_ESPERADA = "8.4.10"
 
 PRUEBAS = [
     (
+        "Persistencia Docker y Portainer",
+        ["scripts/auditar_persistencia_docker.py"],
+    ),
+    (
         "Crear base limpia v8",
         ["scripts/crear_base_v7.py", str(DB_RELEASE_V8.relative_to(APP_ROOT))],
     ),

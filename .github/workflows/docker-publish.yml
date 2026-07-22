@@ -52,6 +52,9 @@ jobs:
         shell: bash
         run: echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
+      - name: Auditar persistencia de datos
+        run: python scripts/auditar_persistencia_docker.py
+
       - name: Preparar emulacion multi-arquitectura
         uses: docker/setup-qemu-action@v4
 

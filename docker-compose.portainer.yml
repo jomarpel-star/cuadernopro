@@ -1,0 +1,22 @@
+name: cuadernopro
+
+services:
+  cuadernopro:
+    image: ${CUADERNOPRO_IMAGE:-jomarpel74/cuadernopro}:${CUADERNOPRO_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "${CUADERNOPRO_BIND_ADDRESS:-0.0.0.0}:${CUADERNOPRO_PORT:-8503}:8501"
+    environment:
+      - TZ=${TZ:-Europe/Madrid}
+      - PYTHONUNBUFFERED=1
+      - CUADERNOPRO_DATA_DIR=/app/runtime
+      - CUADERNOPRO_DB_PATH=/app/runtime/cuadernopro.db
+      - CUADERNOPRO_BACKUPS_DIR=/app/runtime/backups
+      - CUADERNOPRO_EXPORTS_DIR=/app/runtime/exports
+      - CUADERNOPRO_DOCUMENTOS_DIR=/app/runtime/documentos
+    volumes:
+      - cuadernopro_data:/app/runtime
+
+volumes:
+  cuadernopro_data:
+    name: ${CUADERNOPRO_DATA_VOLUME:-cuadernopro_data}
