@@ -107,6 +107,14 @@ docker-compose.portainer.yml
 ```
 
 En `Stacks > Add stack`, pega su contenido en el editor y despliega el stack.
+El puerto queda limitado al propio servidor (`127.0.0.1`) por defecto.
+Para acceder desde otro equipo de una red de confianza, configura explícitamente
+`CUADERNOPRO_BIND_ADDRESS` con la IP privada del servidor en las variables del
+stack. Una instalación anterior que dependiera de la publicación en todas las
+interfaces deberá definir esa variable al actualizar el Compose. Para acceso
+desde Internet, utiliza un proxy con HTTPS y autenticación o una VPN; no publiques
+directamente el puerto de Streamlit.
+
 La configuración crea o reutiliza el volumen estable:
 
 ```text

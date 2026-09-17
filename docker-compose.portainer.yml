@@ -4,8 +4,15 @@ services:
   cuadernopro:
     image: ${CUADERNOPRO_IMAGE:-jomarpel74/cuadernopro}:${CUADERNOPRO_IMAGE_TAG:-latest}
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Conserva acceso a datos existentes con propietarios distintos.
+    cap_add:
+      - DAC_OVERRIDE
     ports:
-      - "${CUADERNOPRO_BIND_ADDRESS:-0.0.0.0}:${CUADERNOPRO_PORT:-8503}:8501"
+      - "${CUADERNOPRO_BIND_ADDRESS:-127.0.0.1}:${CUADERNOPRO_PORT:-8503}:8501"
     environment:
       - TZ=${TZ:-Europe/Madrid}
       - PYTHONUNBUFFERED=1

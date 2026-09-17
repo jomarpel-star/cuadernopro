@@ -1,5 +1,11 @@
 # Seguridad
 
+## Dependencias e imágenes Docker
+
+El proceso de actualización, las comprobaciones antes de publicar y el cambio
+de acceso por defecto en Portainer se documentan en
+[Mantenimiento de seguridad de Docker](docs/SEGURIDAD_DOCKER.md).
+
 ## Reportar problemas de seguridad
 
 Si detectas un problema de seguridad en CuadernoPro, no publiques datos reales

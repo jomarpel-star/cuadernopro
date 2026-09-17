@@ -41,6 +41,9 @@ Las capturas recomendadas para la publicación inicial están recogidas en
 
 ## Descarga
 
+La actualización de seguridad **v8.4.11** corresponde a Docker y código fuente.
+Consulta [las notas de versión](RELEASE_NOTES.md) antes de actualizar un servidor.
+
 La versión recomendada para instalar en Windows es CuadernoPro v8.4.10. La
 release pública debe ofrecer:
 

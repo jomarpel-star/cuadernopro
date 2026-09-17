@@ -1,4 +1,17 @@
 venv/
+.venv/
+.venv-*/
+.vscode/
+.idea/
+.cache/
+.codex/
+.agents/
+build/
+dist/
+dist_windows/
+packaging/windows/output/
+packaging/windows/build/
+packaging/windows/dist/
 __pycache__/
 *.pyc
 *.pyo
@@ -11,6 +24,8 @@ backups/
 exports/
 documentos/
 runtime/
+data/siex/originales/
+data/siex/importados/
 
 *.db
 *.db-*

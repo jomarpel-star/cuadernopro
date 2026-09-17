@@ -1,5 +1,20 @@
 # Checklist release CuadernoPro v8
 
+## Release v8.4.11 (Docker)
+
+- [x] Versión visible y prueba de release alineadas con `8.4.11`.
+- [x] Notas de seguridad y cambio de acceso en Portainer documentados.
+- [x] Dependencias fijadas con hashes y GitPython eliminado.
+- [x] Pruebas locales de la versión 8.4.11 (22 comprobaciones).
+- [ ] Auditoría de dependencias en Windows y Linux en GitHub Actions.
+- [ ] Construcción, escaneo y pruebas de imágenes AMD64 y ARM64.
+- [ ] Integración del commit validado y etiqueta `v8.4.11`.
+- [ ] Publicación comprobada en Docker Hub.
+- [ ] Actualización de la instalación y comprobación de sus datos.
+
+El instalador Windows de 8.4.10 y sus enlaces se mantienen hasta que se prepare
+y pruebe un instalador nuevo. Esta release corresponde a Docker y código fuente.
+
 ## Release v8.4.10
 
 - Versión de producto visible: `8.4.10`.

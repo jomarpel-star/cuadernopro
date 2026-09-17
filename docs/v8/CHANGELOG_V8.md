@@ -1,9 +1,18 @@
 # Changelog CuadernoPro v8
 
-## Próxima versión - Persistencia Docker con Portainer y Watchtower
+## v8.4.11 - Seguridad y persistencia de Docker
 
 ### Cambios
 
+- Se actualiza la base a Debian Trixie manteniendo Python 3.13.
+- Se fijan dependencias y hashes; Streamlit 1.64.0 sustituye la dependencia
+  GitPython y se añaden controles para evitar que reaparezca.
+- Se auditan las dependencias y ambas arquitecturas antes de publicar los
+  mismos artefactos comprobados.
+- Se añaden inventarios SBOM e informes completos de vulnerabilidades.
+- Se limitan las capacidades del contenedor y se impide ganar privilegios.
+- Portainer limita el acceso a localhost por defecto. El acceso desde la red
+  requiere definir explícitamente `CUADERNOPRO_BIND_ADDRESS`.
 - La imagen dirige por defecto la base SQLite, los backups, las exportaciones
   y los documentos a `/app/runtime`.
 - El Dockerfile declara `/app/runtime` como punto de volumen.
@@ -14,6 +23,13 @@
 - La publicación de Docker Hub queda bloqueada si falta alguna protección de
   persistencia.
 - Se documenta la configuración segura para actualizaciones con Watchtower.
+
+### Compatibilidad
+
+- No cambia el esquema de datos ni los volúmenes existentes.
+- Esta release distribuye Docker y código fuente; no incorpora un nuevo
+  instalador Windows.
+- Ver [Mantenimiento de seguridad de Docker](../SEGURIDAD_DOCKER.md).
 
 ## v8.4.10 - Personalización de colores de cultivos
 

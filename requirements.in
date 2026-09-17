@@ -1,0 +1,17 @@
+# Dependencias directas. requirements.txt contiene el cierre de dependencias
+# con versiones y hashes para Python 3.13 en Windows, Linux y macOS.
+# Regenerar siguiendo docs/SEGURIDAD_DOCKER.md.
+streamlit>=1.61,<2
+pandas>=3,<4
+requests>=2.34.2,<3
+folium
+branca
+streamlit-folium
+openpyxl
+python-docx
+xlrd
+geopandas
+shapely
+owslib
+reportlab
+pypdf
