@@ -108,14 +108,35 @@ jobs:
           exit-code: '0'
           ignore-unfixed: false
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+      - name: Resumir el informe completo
+        run: |
+          python3 - <<'PY'
+          import collections
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("trivy.json").read_text())
+          counts = collections.Counter()
+          for result in report.get("Results", []):
+              for finding in result.get("Vulnerabilities", []):
+                  counts[finding["Severity"]] += 1
+                  print(json.dumps({
+                      "target": result["Target"],
+                      "id": finding["VulnerabilityID"],
+                      "severity": finding["Severity"],
+                      "package": finding["PkgName"],
+                      "path": finding.get("PkgPath"),
+                      "installed": finding["InstalledVersion"],
+                      "fixed": finding.get("FixedVersion"),
+                  }))
+          print("Vulnerabilidades por severidad:", dict(counts))
+          PY
       - name: Generar inventario SBOM
         run: trivy image --cache-dir .cache/trivy --format cyclonedx --output sbom.cdx.json "$IMAGE_REF"
       - name: Bloquear vulnerabilidades altas o criticas con correccion
         run: trivy image --cache-dir .cache/trivy --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$IMAGE_REF"
-      - name: Comprobar dependencias y ausencia de GitPython
-        run: |
-          docker run --rm --network none --cap-drop ALL --cap-add DAC_OVERRIDE --security-opt no-new-privileges=true "$IMAGE_REF" python -m pip check
-          docker run --rm --network none --cap-drop ALL --cap-add DAC_OVERRIDE --security-opt no-new-privileges=true "$IMAGE_REF" python -c 'import importlib.util; assert importlib.util.find_spec("git") is None, "GitPython ha vuelto a la imagen"'
+      - name: Comprobar ausencia de GitPython y herramientas de instalacion
+        run: docker run --rm --network none --cap-drop ALL --cap-add DAC_OVERRIDE --security-opt no-new-privileges=true "$IMAGE_REF" python -c 'import importlib.util; unexpected = [name for name in ("git", "pip", "ensurepip") if importlib.util.find_spec(name) is not None]; assert not unexpected, unexpected'
       - name: Probar la aplicacion con datos sinteticos
         run: docker run --rm --network none --cap-drop ALL --cap-add DAC_OVERRIDE --security-opt no-new-privileges=true "$IMAGE_REF" python scripts/probar_release_v8.py
       - name: Probar bind mount y persistencia al recrear el contenedor

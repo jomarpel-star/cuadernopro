@@ -18,7 +18,9 @@ RUN apt-get update \
 
 COPY requirements.txt .
 RUN python -m pip install --require-hashes --only-binary=:all: -r requirements.txt \
-    && python -m pip check
+    && python -m pip check \
+    && python -m pip uninstall -y pip \
+    && python -c "import pathlib, shutil, sysconfig; shutil.rmtree(pathlib.Path(sysconfig.get_path('stdlib')) / 'ensurepip')"
 
 COPY . .
 

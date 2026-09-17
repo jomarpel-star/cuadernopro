@@ -9,6 +9,11 @@
 - Streamlit 1.64.0, que ya no necesita GitPython. La CI comprueba que GitPython
   no reaparece en la imagen.
 - Instalación mediante wheels y hashes obligatorios, seguida de `pip check`.
+- Tras instalar y comprobar las dependencias, se retiran `pip` y `ensurepip`
+  de la imagen final. La aplicación no los necesita para funcionar. Esto elimina
+  las copias internas de msgpack 1.1.2 y setuptools 70.3.0 que Trivy detectó en
+  pip 26.2.1 durante la primera construcción. Las dependencias se actualizan
+  reconstruyendo la imagen, no instalando paquetes en el contenedor en marcha.
 - Exclusión del contexto Docker de `.venv`, herramientas locales, artefactos de
   compilación y catálogos privados, además de los datos ya excluidos.
 - Los dos Compose prohíben ganar privilegios y retiran las capacidades Linux
@@ -57,7 +62,8 @@ commit exacto de la etiqueta que se va a publicar.
 4. Bloquear la publicación si Trivy detecta vulnerabilidades altas o críticas
    para las que exista una corrección. El informe completo también conserva las
    vulnerabilidades sin corrección y las de menor severidad: hay que revisarlas.
-5. Verificar dependencias, ausencia de GitPython y la batería de pruebas dentro
+5. Verificar dependencias durante la construcción, ausencia de GitPython,
+   pip y ensurepip en la imagen final y la batería de pruebas dentro
    de cada imagen, sin red y con las restricciones de capacidades de Compose.
    Comprobar también la escritura en un bind mount con permisos restringidos y
    que sus datos siguen disponibles tras recrear el contenedor.

@@ -8,6 +8,7 @@ Windows disponible sigue siendo el de la versión 8.4.10.
 
 - Base Debian Trixie con Python 3.13 y paquetes del sistema actualizados.
 - Dependencias fijadas con hashes y Streamlit 1.64.0 sin GitPython.
+- Retirada de pip y ensurepip de la imagen final tras comprobar la instalación.
 - Auditoría de dependencias y escaneo de imágenes AMD64/ARM64 antes de publicar.
 - Pruebas de la aplicación y de persistencia al recrear los contenedores.
 - Inventario SBOM e informes de seguridad conservados en GitHub Actions.
