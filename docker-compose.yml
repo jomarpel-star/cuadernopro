@@ -6,6 +6,13 @@ services:
     build:
       context: .
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    # Los bind mounts existentes pueden pertenecer al usuario del anfitrion.
+    cap_add:
+      - DAC_OVERRIDE
     ports:
       - "${CUADERNOPRO_BIND_ADDRESS:-127.0.0.1}:${CUADERNOPRO_PORT:-8503}:8501"
     environment:

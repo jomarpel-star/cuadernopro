@@ -1,0 +1,146 @@
+name: Seguridad y pruebas Docker
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '23 6 * * 1'
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      ref:
+        description: Referencia Git que se debe comprobar
+        type: string
+        required: true
+      export-images:
+        description: Guardar las imagenes comprobadas para su publicacion
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  dependencies:
+    name: Dependencias (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+      - name: Instalar auditor
+        run: python -m pip install pip-audit==2.10.1
+      - name: Auditar todas las dependencias fijadas
+        run: python -m pip_audit --require-hashes --disable-pip -r requirements.txt --format json --output pip-audit.json
+      - name: Conservar informe de dependencias
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: dependencias-${{ matrix.os }}
+          path: pip-audit.json
+          retention-days: 14
+
+  images:
+    name: Imagen (${{ matrix.arch }})
+    needs: dependencies
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    env:
+      IMAGE_REF: cuadernopro:security-${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          persist-credentials: false
+      - name: Identificar el codigo comprobado
+        id: source
+        run: |
+          echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "version=$(python3 -c 'from core.version import APP_VERSION; print(APP_VERSION)')" >> "$GITHUB_OUTPUT"
+      - name: Auditar persistencia y configuracion de Compose
+        run: |
+          python3 scripts/auditar_persistencia_docker.py
+          docker compose config --quiet
+          docker compose -f docker-compose.portainer.yml config --quiet
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+      - name: Construir con la base actualizada
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: .
+          platforms: linux/${{ matrix.arch }}
+          load: true
+          pull: true
+          no-cache: true
+          tags: ${{ env.IMAGE_REF }}
+          labels: |
+            org.opencontainers.image.title=CuadernoPro
+            org.opencontainers.image.description=Cuaderno agricola libre para gestionar la explotacion en local
+            org.opencontainers.image.source=https://github.com/jomarpel-star/cuadernopro
+            org.opencontainers.image.url=https://github.com/jomarpel-star/cuadernopro
+            org.opencontainers.image.licenses=GPL-3.0-or-later
+            org.opencontainers.image.version=${{ steps.source.outputs.version }}
+            org.opencontainers.image.revision=${{ steps.source.outputs.revision }}
+      - name: Informe completo de vulnerabilidades
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE_REF }}
+          scanners: vuln
+          format: json
+          output: trivy.json
+          exit-code: '0'
+          ignore-unfixed: false
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+      - name: Generar inventario SBOM
+        run: trivy image --cache-dir .cache/trivy --format cyclonedx --output sbom.cdx.json "$IMAGE_REF"
+      - name: Bloquear vulnerabilidades altas o criticas con correccion
+        run: trivy image --cache-dir .cache/trivy --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$IMAGE_REF"
+      - name: Comprobar dependencias y ausencia de GitPython
+        run: |
+          docker run --rm --network none --cap-drop ALL --cap-add DAC_OVERRIDE --security-opt no-new-privileges=true "$IMAGE_REF" python -m pip check
+          docker run --rm --network none --cap-drop ALL --cap-add DAC_OVERRIDE --security-opt no-new-privileges=true "$IMAGE_REF" python -c 'import importlib.util; assert importlib.util.find_spec("git") is None, "GitPython ha vuelto a la imagen"'
+      - name: Probar la aplicacion con datos sinteticos
+        run: docker run --rm --network none --cap-drop ALL --cap-add DAC_OVERRIDE --security-opt no-new-privileges=true "$IMAGE_REF" python scripts/probar_release_v8.py
+      - name: Probar bind mount y persistencia al recrear el contenedor
+        run: |
+          data="$RUNNER_TEMP/cuadernopro-runtime"
+          mkdir -m 700 "$data"
+          docker run --rm --network none --cap-drop ALL --cap-add DAC_OVERRIDE --security-opt no-new-privileges=true --mount "type=bind,source=$data,target=/app/runtime" "$IMAGE_REF" python -c 'from core.db import crear_tablas; from core.paths import DB_PATH, DOCS_DIR; crear_tablas(); assert DB_PATH.is_file(); (DOCS_DIR / "persistencia.txt").write_text("persistencia-ok")'
+          docker run --rm --network none --cap-drop ALL --cap-add DAC_OVERRIDE --security-opt no-new-privileges=true --mount "type=bind,source=$data,target=/app/runtime" "$IMAGE_REF" python -c 'import sqlite3; from core.paths import DB_PATH, DOCS_DIR; assert (DOCS_DIR / "persistencia.txt").read_text() == "persistencia-ok"; conn = sqlite3.connect(DB_PATH); assert conn.execute("PRAGMA integrity_check").fetchone()[0] == "ok"; conn.close()'
+      - name: Conservar informes completos
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: seguridad-${{ matrix.arch }}
+          path: |
+            trivy.json
+            sbom.cdx.json
+          retention-days: 14
+      - name: Exportar la imagen ya comprobada
+        if: inputs.export-images
+        run: docker save --output "$RUNNER_TEMP/cuadernopro-${{ matrix.arch }}.tar" "$IMAGE_REF"
+      - name: Conservar imagen para publicar sin reconstruir
+        if: inputs.export-images
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: imagen-${{ matrix.arch }}
+          path: ${{ runner.temp }}/cuadernopro-${{ matrix.arch }}.tar
+          compression-level: 0
+          retention-days: 1

@@ -1,4 +1,4 @@
-FROM python:3.13-slim-bookworm
+FROM python:3.13-slim-trixie
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
@@ -11,13 +11,14 @@ ENV PYTHONUNBUFFERED=1 \
 WORKDIR /app
 
 RUN apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+RUN python -m pip install --require-hashes --only-binary=:all: -r requirements.txt \
+    && python -m pip check
 
 COPY . .
 

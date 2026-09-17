@@ -1,5 +1,23 @@
 # CuadernoPro - Release notes
 
+## v8.4.11 - Seguridad y persistencia de Docker
+
+- Actualiza la imagen a Debian Trixie manteniendo Python 3.13.
+- Fija las dependencias y sus hashes; actualiza Streamlit y elimina la
+  dependencia transitiva GitPython de la instalación nueva.
+- Añade auditorías de dependencias y de imágenes AMD64/ARM64 antes de publicar.
+- Distribuye los mismos artefactos que han superado los controles, sin reconstruir.
+- Refuerza las restricciones del contenedor y excluye entornos locales y datos
+  privados del contexto de construcción.
+- Conserva base, documentos, exportaciones y backups en `/app/runtime`, con
+  configuración específica para Portainer y actualizaciones con Watchtower.
+- Limita el puerto de Portainer a `127.0.0.1` por defecto. Para acceder desde
+  otro equipo, es necesario definir `CUADERNOPRO_BIND_ADDRESS` con la IP privada
+  del servidor o utilizar el proxy autenticado/VPN.
+- No modifica el esquema de datos. Mantiene los volúmenes existentes.
+- Esta publicación está dedicada a Docker y código fuente. El instalador
+  Windows disponible sigue siendo el de la versión 8.4.10.
+
 ## v8.4.10 - Personalización de colores de cultivos
 
 - Mantiene los colores existentes de almendro (verde), olivar (azul) y
