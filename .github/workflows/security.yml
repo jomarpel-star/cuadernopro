@@ -44,7 +44,7 @@ jobs:
         run: python -m pip_audit --require-hashes --disable-pip -r requirements.txt --format json --output pip-audit.json
       - name: Conservar informe de dependencias
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dependencias-${{ matrix.os }}
           path: pip-audit.json
@@ -147,7 +147,7 @@ jobs:
           docker run --rm --network none --cap-drop ALL --cap-add DAC_OVERRIDE --security-opt no-new-privileges=true --mount "type=bind,source=$data,target=/app/runtime" "$IMAGE_REF" python -c 'import sqlite3; from core.paths import DB_PATH, DOCS_DIR; assert (DOCS_DIR / "persistencia.txt").read_text() == "persistencia-ok"; conn = sqlite3.connect(DB_PATH); assert conn.execute("PRAGMA integrity_check").fetchone()[0] == "ok"; conn.close()'
       - name: Conservar informes completos
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: seguridad-${{ matrix.arch }}
           path: |
@@ -159,7 +159,7 @@ jobs:
         run: docker save --output "$RUNNER_TEMP/cuadernopro-${{ matrix.arch }}.tar" "$IMAGE_REF"
       - name: Conservar imagen para publicar sin reconstruir
         if: inputs.export-images
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: imagen-${{ matrix.arch }}
           path: ${{ runner.temp }}/cuadernopro-${{ matrix.arch }}.tar
