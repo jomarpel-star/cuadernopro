@@ -17,6 +17,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $ScriptDir "build_common.ps1")
 $RepoRoot = (Resolve-Path (Join-Path $ScriptDir "..\..")).Path
 
 function Get-CuadernoProVersion {
@@ -33,7 +34,7 @@ function Get-CuadernoProVersion {
 function Invoke-Installer {
     param([string]$FilePath, [string[]]$Arguments)
 
-    $Process = Start-Process -FilePath $FilePath -ArgumentList $Arguments -PassThru -Wait
+    $Process = Start-Process -FilePath $FilePath -ArgumentList $Arguments -PassThru -Wait -WindowStyle Hidden
 
     if ($Process.ExitCode -ne 0) {
         throw "$FilePath termino con codigo $($Process.ExitCode)"
@@ -76,7 +77,7 @@ try {
         "--no-browser",
         "--port", $Port.ToString(),
         "--data-root", $DataRoot
-    ) -PassThru
+    ) -PassThru -WindowStyle Hidden
 
     $Url = "http://127.0.0.1:$Port"
     $Deadline = (Get-Date).AddSeconds($TimeoutSeconds)
@@ -121,8 +122,8 @@ try {
     Write-Host "Instalador OK: $Url"
 }
 finally {
-    if ($Process -and -not $Process.HasExited) {
-        Stop-Process -Id $Process.Id -Force -ErrorAction SilentlyContinue
+    if ($Process) {
+        Stop-CheckedTestProcess $Process
     }
 
     if (Test-Path $UninstallPath) {

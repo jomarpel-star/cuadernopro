@@ -1,0 +1,67 @@
+name: Comprobar instalador Windows
+
+on:
+  pull_request:
+    paths:
+      - 'packaging/windows/**'
+      - 'core/version.py'
+      - 'requirements.txt'
+      - '.github/workflows/windows-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  installer:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.13'
+      - name: Instalar herramientas para comprobar los controles
+        run: |
+          python -m pip install --only-binary=:all: pyinstaller==6.22.3
+      - name: Probar rechazo de candidatos sin firma
+        run: ./packaging/windows/test_release_controls.ps1
+      - name: Construir candidato con identidad y version
+        run: ./packaging/windows/build_installer_windows.ps1 -Clean -Release
+      - name: Probar arranque del portable con datos temporales
+        run: ./packaging/windows/test_portable_windows.ps1
+      - name: Probar instalacion y desinstalacion en el runner
+        run: ./packaging/windows/test_installer_windows.ps1
+      - name: Registrar firmas y huella del candidato
+        run: |
+          $version = python -c 'from core.version import APP_VERSION; print(APP_VERSION)'
+          ./packaging/windows/audit_windows_release.ps1 `
+            -AppDirectory dist_windows/CuadernoPro `
+            -InstallerPath "packaging/windows/output/CuadernoPro-$version-Setup.exe" `
+            -AuditOnly
+          "Commit: $env:GITHUB_SHA`nCANDIDATO DE PRUEBAS. No es una release firmada." |
+            Set-Content packaging/windows/output/auditoria/BUILD.txt
+      - name: Conservar solo informes durante tres dias
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-informe-candidato
+          path: packaging/windows/output/auditoria/
+          if-no-files-found: error
+          retention-days: 3
+      - name: Conservar instalador solo en ejecuciones manuales
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-candidato-sin-publicar
+          path: packaging/windows/output/*-Setup.exe
+          if-no-files-found: error
+          retention-days: 1

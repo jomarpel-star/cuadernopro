@@ -16,6 +16,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $ScriptDir "build_common.ps1")
 $RepoRoot = (Resolve-Path (Join-Path $ScriptDir "..\..")).Path
 $DistWindowsApp = Join-Path $RepoRoot "dist_windows\CuadernoPro"
 $ExePath = Join-Path $DistWindowsApp "CuadernoPro.exe"
@@ -201,7 +202,7 @@ if ($Release) {
     $BuildArgs += "-Release"
 }
 
-& powershell @BuildArgs
+Invoke-CheckedNative powershell $BuildArgs
 
 Assert-File $ExePath "No existe el ejecutable portable esperado: $ExePath"
 
@@ -220,13 +221,14 @@ Write-Host $IssPath
 Invoke-Step "Compilando instalador Inno Setup"
 Push-Location $ScriptDir
 try {
-    & $IsccExe $IssPath
+    Invoke-CheckedNative $IsccExe @($IssPath)
 }
 finally {
     Pop-Location
 }
 
 Assert-File $OutputExe "No se genero el instalador esperado: $OutputExe"
+Assert-CuadernoProIdentity -Path $OutputExe -Version $AppVersion
 
 Invoke-Step "Resultado"
 Write-Host "Instalador Windows: $OutputExe"

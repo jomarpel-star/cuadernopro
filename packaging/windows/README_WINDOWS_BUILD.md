@@ -1,7 +1,32 @@
-# CuadernoPro v8.3.2 - Windows portable e instalador
+# CuadernoPro - Windows portable e instalador
 
 Esta carpeta prepara el build Windows de CuadernoPro sin Docker, sin WSL y sin
 terminal para el usuario final.
+
+## Identidad, firma y publicacion
+
+La version del ejecutable y del instalador se toma de `core/version.py`.
+El ejecutable incorpora metadatos de producto y version. Esto no constituye
+una firma digital. `-Release` exige el icono oficial; no implica que el
+resultado este firmado ni listo para publicarse.
+
+El workflow `Comprobar instalador Windows` construye y prueba candidatos,
+sin publicarlos. Para la subida manual a GitHub, consultar el procedimiento
+y el control estricto de firmas en
+[FIRMA_WINDOWS.md](../../docs/publicacion/FIRMA_WINDOWS.md).
+
+Diagnostico de un candidato antes de solicitar la firma (ajustar version):
+
+```powershell
+.\packaging\windows\audit_windows_release.ps1 `
+  -AppDirectory .\dist_windows\CuadernoPro `
+  -InstallerPath .\packaging\windows\output\CuadernoPro-8.4.11-Setup.exe `
+  -AuditOnly
+```
+
+El informe contiene rutas relativas, hashes y estado de todas las firmas.
+El modo de diagnostico admite archivos sin firmar; no los autoriza para
+publicarse. Los ejemplos usan 8.4.11; ajustar siempre la version a `core/version.py`.
 
 ## Artefactos
 
@@ -14,7 +39,7 @@ dist_windows\CuadernoPro\CuadernoPro.exe
 Instalador Inno Setup:
 
 ```text
-packaging\windows\output\CuadernoPro-8.3.2-Setup.exe
+packaging\windows\output\CuadernoPro-8.4.11-Setup.exe
 ```
 
 `dist_windows/`, `build/`, `dist/`, `.venv-windows/`, `packaging/windows/output/`
@@ -141,7 +166,7 @@ El script:
 4. Valida que la fuente del instalador no incluya datos reales.
 5. Genera `packaging\windows\CuadernoPro.iss` desde la plantilla.
 6. Ejecuta `ISCC.exe`.
-7. Valida que exista `packaging\windows\output\CuadernoPro-8.3.2-Setup.exe`.
+7. Valida que exista `packaging\windows\output\CuadernoPro-8.4.11-Setup.exe`.
 
 ## Probar instalador
 
@@ -155,7 +180,7 @@ La prueba instala en una carpeta temporal, arranca el ejecutable instalado con
 un `--data-root` temporal, comprueba respuesta HTTP local, desinstala y confirma
 que la carpeta de datos de prueba no se borra.
 
-La comprobacion visual de `CuadernoPro v8.3.2` requiere navegador real porque
+La comprobacion visual de `CuadernoPro v8.4.11` requiere navegador real porque
 Streamlit renderiza parte de la interfaz en el cliente.
 
 ## Prueba manual obligatoria
@@ -163,7 +188,7 @@ Streamlit renderiza parte de la interfaz en el cliente.
 Ejecutar:
 
 ```text
-packaging\windows\output\CuadernoPro-8.3.2-Setup.exe
+packaging\windows\output\CuadernoPro-8.4.11-Setup.exe
 ```
 
 Comprobar:
@@ -172,9 +197,9 @@ Comprobar:
 2. Crea acceso directo en escritorio.
 3. Crea acceso directo en menú inicio.
 4. Abre CuadernoPro al finalizar si se deja marcada la opción.
-5. Muestra `CuadernoPro v8.3.2`.
+5. Muestra `CuadernoPro v8.4.11`.
 6. `CuadernoPro.exe` tiene el icono personalizado.
-7. `CuadernoPro-8.3.2-Setup.exe` tiene el icono personalizado.
+7. `CuadernoPro-8.4.11-Setup.exe` tiene el icono personalizado.
 8. Los accesos directos de escritorio y menú inicio tienen icono.
 9. Crea `Documents\CuadernoPro\datos\cuadernopro.db`.
 10. Crea logs en `Documents\CuadernoPro\logs`.
