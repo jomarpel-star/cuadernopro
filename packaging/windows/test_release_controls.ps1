@@ -61,3 +61,5 @@ if (-not $Rejected -or -not (Test-Path -LiteralPath $TestRoot)) {
     throw 'La limpieza ha aceptado una ruta fuera del directorio autorizado.'
 }
 Write-Host 'OK: metadatos PE, inventario, hashes, rechazo de firmas ausentes, errores de build y limite de limpieza.'
+# El fallo nativo anterior es intencionado; no propagar su codigo al runner.
+exit 0
