@@ -1,5 +1,15 @@
 #requires -Version 5.1
 
+function Assert-CuadernoProIdentity {
+    param([string]$Path, [string]$Version)
+    $Info = (Get-Item -LiteralPath $Path).VersionInfo
+    if ($Info.ProductName -ne 'CuadernoPro' -or $Info.CompanyName -ne 'CuadernoPro' -or
+        $Info.ProductVersion -ne $Version) {
+        throw "Identidad o version incorrecta en el artefacto construido: $Path"
+    }
+    Write-Host "Identidad Windows verificada: CuadernoPro $Version"
+}
+
 function Invoke-CheckedNative {
     param([string]$Program, [string[]]$Arguments)
     & $Program @Arguments

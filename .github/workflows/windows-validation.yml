@@ -50,12 +50,18 @@ jobs:
             -AuditOnly
           "Commit: $env:GITHUB_SHA`nCANDIDATO DE PRUEBAS. No es una release firmada." |
             Set-Content packaging/windows/output/auditoria/BUILD.txt
-      - name: Conservar candidato e informe durante tres dias
+      - name: Conservar solo informes durante tres dias
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-informe-candidato
+          path: packaging/windows/output/auditoria/
+          if-no-files-found: error
+          retention-days: 3
+      - name: Conservar instalador solo en ejecuciones manuales
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: windows-candidato-sin-publicar
-          path: |
-            packaging/windows/output/*-Setup.exe
-            packaging/windows/output/auditoria/
+          path: packaging/windows/output/*-Setup.exe
           if-no-files-found: error
-          retention-days: 3
+          retention-days: 1

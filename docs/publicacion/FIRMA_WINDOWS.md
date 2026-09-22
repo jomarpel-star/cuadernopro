@@ -24,8 +24,10 @@ los binarios de dependencias sin esa transformacion adicional.
 1. Construir desde el commit revisado que se etiquetara como release. El
    workflow `Comprobar instalador Windows` genera un candidato e informa de
    su commit; nunca crea una release ni actualiza la web. Solo se activa en
-   cambios relacionados con Windows o manualmente. Los artefactos caducan
-   a los tres dias.
+   cambios relacionados con Windows o manualmente. Para reducir almacenamiento,
+   las pull requests conservan solo informes durante tres dias; el instalador
+   se conserva un dia unicamente en ejecuciones manuales. Se usan runners
+   estandar de GitHub, sin contratar capacidad adicional.
 2. Superar las pruebas de arranque, instalacion, desinstalacion y persistencia
    con datos temporales. Probar ademas una actualizacion sobre la version
    anterior, apertura de documentos y las funciones principales en una

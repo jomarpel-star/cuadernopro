@@ -228,6 +228,7 @@ finally {
 }
 
 Assert-File $OutputExe "No se genero el instalador esperado: $OutputExe"
+Assert-CuadernoProIdentity -Path $OutputExe -Version $AppVersion
 
 Invoke-Step "Resultado"
 Write-Host "Instalador Windows: $OutputExe"

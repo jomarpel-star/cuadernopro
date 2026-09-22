@@ -229,6 +229,7 @@ if (-not $NoPyInstallerClean) {
 Invoke-CheckedNative $PythonExe (@("-m", "PyInstaller") + $PyInstallerArgs)
 
 Assert-File $ExePath "No se genero el ejecutable esperado: $ExePath"
+Assert-CuadernoProIdentity -Path $ExePath -Version $AppVersion
 
 Invoke-Step "Copiando documentacion util"
 $DocsOut = Join-Path $DistWindowsApp "docs"
