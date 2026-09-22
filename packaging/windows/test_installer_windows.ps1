@@ -33,7 +33,7 @@ function Get-CuadernoProVersion {
 function Invoke-Installer {
     param([string]$FilePath, [string[]]$Arguments)
 
-    $Process = Start-Process -FilePath $FilePath -ArgumentList $Arguments -PassThru -Wait
+    $Process = Start-Process -FilePath $FilePath -ArgumentList $Arguments -PassThru -Wait -WindowStyle Hidden
 
     if ($Process.ExitCode -ne 0) {
         throw "$FilePath termino con codigo $($Process.ExitCode)"
@@ -76,7 +76,7 @@ try {
         "--no-browser",
         "--port", $Port.ToString(),
         "--data-root", $DataRoot
-    ) -PassThru
+    ) -PassThru -WindowStyle Hidden
 
     $Url = "http://127.0.0.1:$Port"
     $Deadline = (Get-Date).AddSeconds($TimeoutSeconds)

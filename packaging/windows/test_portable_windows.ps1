@@ -52,7 +52,7 @@ try {
         "--no-browser",
         "--port", $Port.ToString(),
         "--data-root", $DataRoot
-    ) -PassThru
+    ) -PassThru -WindowStyle Hidden
     $Url = "http://127.0.0.1:$Port"
     $Deadline = (Get-Date).AddSeconds($TimeoutSeconds)
     $Ready = $false

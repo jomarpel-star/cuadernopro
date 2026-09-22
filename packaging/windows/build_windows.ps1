@@ -13,7 +13,7 @@
 
 param(
     [string]$Python = "python",
-    [string]$AppVersion = "8.3.2",
+    [string]$AppVersion = "",
     [switch]$Clean,
     [switch]$Release,
     [switch]$NoVenv,
@@ -25,6 +25,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $ScriptDir "build_common.ps1")
 $RepoRoot = (Resolve-Path (Join-Path $ScriptDir "..\..")).Path
 $VenvDir = Join-Path $RepoRoot ".venv-windows"
 $PythonExe = $Python
@@ -151,7 +152,16 @@ if ($env:OS -ne "Windows_NT") {
 }
 
 Invoke-Step "Comprobando Python"
-& $Python --version
+Invoke-CheckedNative $Python @("--version")
+$VersionSource = Get-Content -LiteralPath (Join-Path $RepoRoot "core\version.py") -Raw
+if ($VersionSource -notmatch 'APP_VERSION\s*=\s*"(\d+\.\d+\.\d+)"') {
+    throw "No se pudo leer la version de la aplicacion."
+}
+$SourceVersion = $Matches[1]
+if ($AppVersion -and $AppVersion -ne $SourceVersion) {
+    throw "La version solicitada no coincide con core/version.py."
+}
+$AppVersion = $SourceVersion
 where.exe python | Out-Host
 where.exe powershell | Out-Host
 
@@ -160,7 +170,7 @@ if (-not $NoVenv) {
 
     if (-not (Test-Path $PythonExe)) {
         Invoke-Step "Creando entorno virtual de build"
-        & $Python -m venv $VenvDir
+        Invoke-CheckedNative $Python @("-m", "venv", $VenvDir)
     }
 
     Assert-File $PythonExe "No se encontro Python en el entorno virtual: $PythonExe"
@@ -168,9 +178,10 @@ if (-not $NoVenv) {
 
 if (-not $SkipInstall) {
     Invoke-Step "Instalando dependencias de aplicacion y build"
-    & $PythonExe -m pip install --upgrade pip
-    & $PythonExe -m pip install -r (Join-Path $RepoRoot "requirements.txt")
-    & $PythonExe -m pip install pyinstaller
+    Invoke-CheckedNative $PythonExe @("-m", "pip", "install", "--require-hashes",
+        "--only-binary=:all:", "-r", (Join-Path $RepoRoot "requirements.txt"))
+    Invoke-CheckedNative $PythonExe @("-m", "pip", "install", "--only-binary=:all:", "pyinstaller==6.22.3")
+    Invoke-CheckedNative $PythonExe @("-m", "pip", "check")
 }
 
 Assert-File (Join-Path $RepoRoot "app.py") "No se encontro app.py"
@@ -181,7 +192,7 @@ Invoke-Step "Comprobando branding"
 Confirm-BrandingIcon
 
 Invoke-Step "Comprobando PyInstaller"
-& $PythonExe -m PyInstaller --version
+Invoke-CheckedNative $PythonExe @("-m", "PyInstaller", "--version")
 $PyInstallerExe = Join-Path (Split-Path $PythonExe -Parent) "pyinstaller.exe"
 
 if (Test-Path $PyInstallerExe) {
@@ -193,12 +204,11 @@ else {
 
 if ($Clean) {
     Invoke-Step "Limpiando carpetas de build"
-    Remove-Item $BuildDir -Recurse -Force -ErrorAction SilentlyContinue
-    Remove-Item $DistRoot -Recurse -Force -ErrorAction SilentlyContinue
-    Remove-Item $DistWindowsRoot -Recurse -Force -ErrorAction SilentlyContinue
-    Remove-Item (Join-Path $ScriptDir "build") -Recurse -Force -ErrorAction SilentlyContinue
-    Remove-Item (Join-Path $ScriptDir "dist") -Recurse -Force -ErrorAction SilentlyContinue
-    Remove-Item (Join-Path $ScriptDir "output") -Recurse -Force -ErrorAction SilentlyContinue
+    foreach ($Directory in @($BuildDir, $DistRoot, $DistWindowsRoot,
+            (Join-Path $ScriptDir "build"), (Join-Path $ScriptDir "dist"),
+            (Join-Path $ScriptDir "output"))) {
+        Remove-CheckedBuildDirectory -Path $Directory -RepoRoot $RepoRoot
+    }
 }
 
 New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
@@ -216,7 +226,7 @@ if (-not $NoPyInstallerClean) {
     $PyInstallerArgs = @("--clean") + $PyInstallerArgs
 }
 
-& $PythonExe -m PyInstaller @PyInstallerArgs
+Invoke-CheckedNative $PythonExe (@("-m", "PyInstaller") + $PyInstallerArgs)
 
 Assert-File $ExePath "No se genero el ejecutable esperado: $ExePath"
 

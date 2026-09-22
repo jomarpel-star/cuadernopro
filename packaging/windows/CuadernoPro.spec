@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 from pathlib import Path
+import runpy
 
 from PyInstaller.utils.hooks import collect_all, collect_submodules
 
@@ -7,6 +8,9 @@ from PyInstaller.utils.hooks import collect_all, collect_submodules
 block_cipher = None
 SPEC_DIR = Path(SPECPATH).resolve()
 REPO_ROOT = SPEC_DIR.parents[1]
+WINDOWS_VERSION_INFO = runpy.run_path(str(SPEC_DIR / "version_info.py"))[
+    "windows_version_info"
+](REPO_ROOT)
 BRANDING_ICON = REPO_ROOT / "assets" / "branding" / "cuadernopro.ico"
 BRANDING_PNG = REPO_ROOT / "assets" / "branding" / "cuadernopro.png"
 EXE_ICON = str(BRANDING_ICON) if BRANDING_ICON.exists() else None
@@ -185,7 +189,8 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
+    version=WINDOWS_VERSION_INFO,
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
@@ -200,7 +205,7 @@ coll = COLLECT(
     a.zipfiles,
     a.datas,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     name="CuadernoPro",
 )
