@@ -5,7 +5,7 @@ function Assert-CuadernoProIdentity {
     $Info = (Get-Item -LiteralPath $Path).VersionInfo
     if ($Info.ProductName -ne 'CuadernoPro' -or $Info.CompanyName -ne 'CuadernoPro' -or
         $Info.ProductVersion -ne $Version) {
-        throw "Identidad o version incorrecta en el artefacto construido: $Path"
+        throw "Identidad incorrecta en ${Path}: producto='$($Info.ProductName)', editor='$($Info.CompanyName)', version='$($Info.ProductVersion)'; se esperaba CuadernoPro $Version."
     }
     Write-Host "Identidad Windows verificada: CuadernoPro $Version"
 }
