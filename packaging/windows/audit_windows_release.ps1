@@ -68,8 +68,9 @@ $Results = @(foreach ($InputFile in $Inputs) {
         # Inno Setup asigna al desinstalador su propia version de motor.
         if ($InputFile.Name -notlike 'uninstaller/*') {
             $Metadata = $File.VersionInfo
-            if ($Metadata.ProductName -ne 'CuadernoPro' -or $Metadata.CompanyName -ne 'CuadernoPro' -or
-                $Metadata.ProductVersion -ne $ExpectedVersion) {
+            if (([string]$Metadata.ProductName).Trim() -ne 'CuadernoPro' -or
+                ([string]$Metadata.CompanyName).Trim() -ne 'CuadernoPro' -or
+                ([string]$Metadata.ProductVersion).Trim() -ne $ExpectedVersion) {
                 $Problems.Add("$($InputFile.Name): identidad o version de producto incorrectas.")
             }
         }
@@ -81,8 +82,8 @@ $Results = @(foreach ($InputFile in $Inputs) {
         signer=$Signer
         rsa=[bool]$Rsa
         timestamped=$Timestamped
-        product=$File.VersionInfo.ProductName
-        product_version=$File.VersionInfo.ProductVersion
+        product=([string]$File.VersionInfo.ProductName).Trim()
+        product_version=([string]$File.VersionInfo.ProductVersion).Trim()
     }
 })
 $Report = [ordered]@{

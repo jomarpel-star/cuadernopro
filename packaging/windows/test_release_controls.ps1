@@ -20,6 +20,10 @@ exe = output / 'app/CuadernoPro.exe'
 shutil.copyfile(bootloader, exe)
 versioninfo.write_version_info_to_executable(str(exe), helpers['windows_version_info'](repo))
 shutil.copyfile(exe, output / 'Setup.exe')
+installer_info = helpers['windows_version_info'](repo)
+for field in installer_info.kids[0].kids[0].kids:
+    field.val += ' ' * 20
+versioninfo.write_version_info_to_executable(str(output / 'Setup.exe'), installer_info)
 shutil.copyfile(exe, output / 'unins000.exe')
 shutil.copyfile(exe, output / 'app/dependency.pyd')
 '@
@@ -34,6 +38,10 @@ $Options = @{
 }
 & $Audit @Options -AuditOnly
 $Report = Get-Content -LiteralPath (Join-Path $Options.OutputDirectory 'windows-release-audit.json') -Raw | ConvertFrom-Json
+Assert-CuadernoProIdentity -Path (Join-Path $TestRoot 'Setup.exe') -Version $Report.app_version
+if (@($Report.problems | Where-Object { $_ -like '*identidad o version*' }).Count) {
+    throw 'Se han rechazado los espacios de relleno de los metadatos Inno Setup.'
+}
 if ($Report.signature_gate_passed -or $Report.files.Count -ne 4) {
     throw 'El control ha aceptado binarios sin firmar o ha omitido una dependencia.'
 }

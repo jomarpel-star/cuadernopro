@@ -3,8 +3,10 @@
 function Assert-CuadernoProIdentity {
     param([string]$Path, [string]$Version)
     $Info = (Get-Item -LiteralPath $Path).VersionInfo
-    if ($Info.ProductName -ne 'CuadernoPro' -or $Info.CompanyName -ne 'CuadernoPro' -or
-        $Info.ProductVersion -ne $Version) {
+    # Inno Setup reserva espacio en estos campos y los rellena con blancos.
+    if (([string]$Info.ProductName).Trim() -ne 'CuadernoPro' -or
+        ([string]$Info.CompanyName).Trim() -ne 'CuadernoPro' -or
+        ([string]$Info.ProductVersion).Trim() -ne $Version) {
         throw "Identidad incorrecta en ${Path}: producto='$($Info.ProductName)', editor='$($Info.CompanyName)', version='$($Info.ProductVersion)'; se esperaba CuadernoPro $Version."
     }
     Write-Host "Identidad Windows verificada: CuadernoPro $Version"
