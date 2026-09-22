@@ -17,6 +17,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $ScriptDir "build_common.ps1")
 $RepoRoot = (Resolve-Path (Join-Path $ScriptDir "..\..")).Path
 
 function Get-CuadernoProVersion {
@@ -121,8 +122,8 @@ try {
     Write-Host "Instalador OK: $Url"
 }
 finally {
-    if ($Process -and -not $Process.HasExited) {
-        Stop-Process -Id $Process.Id -Force -ErrorAction SilentlyContinue
+    if ($Process) {
+        Stop-CheckedTestProcess $Process
     }
 
     if (Test-Path $UninstallPath) {

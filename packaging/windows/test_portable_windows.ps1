@@ -21,6 +21,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $ScriptDir "build_common.ps1")
 $RepoRoot = (Resolve-Path (Join-Path $ScriptDir "..\..")).Path
 $ExePath = Join-Path $RepoRoot "dist_windows\CuadernoPro\CuadernoPro.exe"
 
@@ -89,14 +90,12 @@ try {
 
     Write-Host "Portable OK: $Url"
     Write-Host "Cerrando proceso de prueba: $($Process.Id)"
-    Stop-Process -Id $Process.Id -Force -ErrorAction SilentlyContinue
-    Wait-Process -Id $Process.Id -Timeout 20 -ErrorAction SilentlyContinue
+    Stop-CheckedTestProcess $Process
     $Process = $null
 }
 finally {
-    if ($Process -and -not $Process.HasExited) {
-        Stop-Process -Id $Process.Id -Force -ErrorAction SilentlyContinue
-        Wait-Process -Id $Process.Id -Timeout 20 -ErrorAction SilentlyContinue
+    if ($Process) {
+        Stop-CheckedTestProcess $Process
     }
 
     if ($null -eq $PreviousDataRoot) {
@@ -106,7 +105,8 @@ finally {
         $env:CUADERNOPRO_WINDOWS_DATA_ROOT = $PreviousDataRoot
     }
 
-    $RemainingProcesses = @(Get-Process CuadernoPro -ErrorAction SilentlyContinue)
+    $RemainingProcesses = @(Get-Process CuadernoPro -ErrorAction SilentlyContinue |
+        Where-Object { -not $_.HasExited })
 
     if ($RemainingProcesses.Count -gt 0) {
         $Ids = ($RemainingProcesses | ForEach-Object { $_.Id }) -join ", "

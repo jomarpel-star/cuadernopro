@@ -1,5 +1,16 @@
 #requires -Version 5.1
 
+function Stop-CheckedTestProcess {
+    param([System.Diagnostics.Process]$Process)
+    if ($null -eq $Process) { return }
+    if (-not $Process.HasExited) { $Process.Kill() }
+    if (-not $Process.WaitForExit(20000)) {
+        throw "El proceso de prueba $($Process.Id) no ha terminado."
+    }
+    # Cerrar el handle evita enumerar como vivo un proceso ya terminado.
+    $Process.Dispose()
+}
+
 function Assert-CuadernoProIdentity {
     param([string]$Path, [string]$Version)
     $Info = (Get-Item -LiteralPath $Path).VersionInfo
