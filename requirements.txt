@@ -893,9 +893,9 @@ pyogrio==0.13.0 \
     --hash=sha256:e605494bfea5d40ad4d37df1db1d7cb8950a3135eff9adba2f79673393f31e12 \
     --hash=sha256:ffa3b91f4ac7518dbd9fc1294fa81df316ff5e5a67ae6d95fc5f7bb35b2acf10
     # via geopandas
-pypdf==6.19.0 \
-    --hash=sha256:7e5d6e730e7dae87d560a2cee218b852f6498c8be61966f3cd02ead971e48d14 \
-    --hash=sha256:bbc43aca292369ccc6cbc8a921991ecf2538a3587ab5a116eff06c321d647155
+pypdf==6.20.0 \
+    --hash=sha256:72b1e897fef7f5bbed7f2a93881a4861d98dbf25ae39981c8a023583239edbda \
+    --hash=sha256:f003fc2014814d264fe7dd3f9d435c158e23e1a85a2233f87a0a2d6d21c914ad
     # via -r requirements.in
 pyproj==3.8.0 \
     --hash=sha256:01a1601da9c6ad247a12d304f96f9e0b4ddd00b307636341c136442a70c5e218 \
@@ -1272,10 +1272,6 @@ typing-extensions==4.16.0 \
     #   anyio
     #   python-docx
     #   streamlit
-tzdata==2026.4 ; sys_platform == 'emscripten' or sys_platform == 'win32' \
-    --hash=sha256:c2169a8b0a7a5e9674da5a135ccdfb2b3e671b333ed9fed17b41f73c34476e81 \
-    --hash=sha256:f1b8bd365d8d210c55353f4d7f8d6d8561c0ba50d704b700d195a9424bba0d79
-    # via pandas
 urllib3==2.8.0 \
     --hash=sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3 \
     --hash=sha256:63bf2ead4c879426ebf22ef2a781eeb4aa3b4ae798a0435506f8687fd5bb9b63
@@ -1284,7 +1280,7 @@ uvicorn==0.53.0 \
     --hash=sha256:a9356f0cb89b3b8621529c5d5eebd69bfe154f4c3f68b4cf2de47e45fa855c2e \
     --hash=sha256:e8dca71ec86dce5f04e333f0d56cdedf942446e6643b9cea1af0d6d3a02cb03e
     # via streamlit
-watchdog==6.0.0 ; sys_platform != 'darwin' \
+watchdog==6.0.0 \
     --hash=sha256:07df1fdd701c5d4c8e55ef6cf55b8f0120fe1aef7ef39a1c6fc6bc2e606d517a \
     --hash=sha256:20ffe5b202af80ab4266dcd3e91aae72bf2da48c0d33bdb15c66658e685e94e2 \
     --hash=sha256:212ac9b8bf1161dc91bd09c048048a95ca3a4c4f5e5d4a7d1b1a7d5752a7f96f \
